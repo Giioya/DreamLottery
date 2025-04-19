@@ -26,15 +26,21 @@ export const LOTTERY_ABI = [
     "function rescatarPremio(uint256 _loteriaId) external",
     ];
 
-    // Conecta MetaMask y devuelve el contrato
-    export const getLotteryContract = async () => {
-    if (!window.ethereum) throw new Error("MetaMask no está disponible");
+const RPC_URL = "worldchain-mainnet.g.alchemy.com/public"; // ✅ Mejor que el de Alchemy para World Chain directa
 
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
+// Crear instancia de provider público
+const publicProvider = new ethers.JsonRpcProvider(RPC_URL);
 
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, LOTTERY_ABI, signer);
-    return contract;
-};
+// Función para obtener el contrato
+export const getLotteryContract = async () => {
+    if (typeof window !== "undefined" && (window as any).ethereum?.isWorldApp) {
+        const provider = new ethers.BrowserProvider((window as any).ethereum);
+        const signer = await provider.getSigner();
+        return new ethers.Contract(CONTRACT_ADDRESS, LOTTERY_ABI, signer);
+    } else {
+        // Si no está World App, solo lectura pública
+        return new ethers.Contract(CONTRACT_ADDRESS, LOTTERY_ABI, publicProvider);
+    }
+    };
 
 export const provider = new ethers.JsonRpcProvider("https://worldchain-mainnet.g.alchemy.com/public");
