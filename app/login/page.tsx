@@ -4,7 +4,7 @@ import { useWalletAuth } from "@/components/wallet/";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import logo from "@/public/images/carga_buenocambios.jpg"; // Asegúrate de tener esta imagen en tu proyecto
+import logo from "@/public/images/logoLottery.jpg"; // Asegúrate de tener esta imagen en tu proyecto
 
 export default function LoginPage() {
     const { signInWithWallet, isLoading, walletAddress } = useWalletAuth();
