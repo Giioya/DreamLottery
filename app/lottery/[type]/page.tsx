@@ -7,6 +7,8 @@ import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import { getLotteryContract } from "@/app/utils/ethersHelpers";
 import { ArrowLeft } from "lucide-react";
 import { ethers } from "ethers";
+import { CONTRACT_ADDRESS, sendTransaction } from "@/app/utils/ethersHelpers";
+
 
 const lotteryTypes = {
     quartz: {
@@ -86,15 +88,15 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
 
     useEffect(() => {
         const fetchActiveLottery = async () => {
-            try {
-                const contract = await getLotteryContract();
-                const data = await contract.obtenerUltimaLoteriaActivaPorTipo(
-                    type.charAt(0).toUpperCase() + type.slice(1)
-                );
-                setLotteryId(Number(data.id));
-            } catch (err) {
-                console.error("Error al obtener la última lotería activa:", err);
-            }
+        try {
+            const contract = await getLotteryContract();
+            const data = await contract.obtenerUltimaLoteriaActivaPorTipo(
+            type.charAt(0).toUpperCase() + type.slice(1)
+            );
+            setLotteryId(Number(data.id));
+        } catch (err) {
+            console.error("Error al obtener la última lotería activa:", err);
+        }
         };
 
         fetchActiveLottery();
@@ -104,16 +106,16 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
         if (lotteryId === null) return;
 
         const fetchPurchased = async () => {
-            try {
-                const contract = await getLotteryContract();
-                const buyers: string[] = await contract.verCompradores(lotteryId);
-                const purchased: number[] = buyers
-                    .map((addr, idx) => (addr !== ethers.ZeroAddress ? idx : null))
-                    .filter((v) => v !== null) as number[];
-                setPurchasedNumbers(purchased);
-            } catch (err) {
-                console.error("Error al obtener boletos comprados:", err);
-            }
+        try {
+            const contract = await getLotteryContract();
+            const buyers: string[] = await contract.verCompradores(lotteryId);
+            const purchased: number[] = buyers
+            .map((addr, idx) => (addr !== ethers.ZeroAddress ? idx : null))
+            .filter((v) => v !== null) as number[];
+            setPurchasedNumbers(purchased);
+        } catch (err) {
+            console.error("Error al obtener boletos comprados:", err);
+        }
         };
 
         fetchPurchased();
@@ -121,11 +123,11 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
 
     const toggleNumberSelection = (num: number) => {
         setSelectedNumbers((prev) =>
-            prev.includes(num)
-                ? prev.filter((n) => n !== num)
-                : prev.length < 10
-                ? [...prev, num]
-                : prev
+        prev.includes(num)
+            ? prev.filter((n) => n !== num)
+            : prev.length < 10
+            ? [...prev, num]
+            : prev
         );
     };
 
@@ -133,174 +135,175 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
 
     const buyTickets = async () => {
         if (selectedNumbers.length === 0) {
-            setErrorMessage("Debes seleccionar al menos un número.");
-            return;
+        setErrorMessage("Debes seleccionar al menos un número.");
+        return;
         }
 
         if (lotteryId === null) {
-            setErrorMessage("No se pudo obtener la lotería activa.");
-            return;
+        setErrorMessage("No se pudo obtener la lotería activa.");
+        return;
         }
 
         try {
-            setIsLoading(true);
-            setErrorMessage("");
+        setIsLoading(true);
+        setErrorMessage("");
 
-            const contract = await getLotteryContract();
-            const priceInWei = ethers.parseEther(lottery.price);
-            const totalCost = priceInWei * BigInt(selectedNumbers.length);
+        const priceInWei = ethers.parseEther(lottery.price);
+        const totalCost = priceInWei * BigInt(selectedNumbers.length);
 
-            // Aquí es donde se envía la transacción
-            const tx = await contract.comprarBoletos(lotteryId, selectedNumbers, {
-                value: totalCost,
-            });
+        // Aquí se cambia el código para usar sendTransaction
+        const transactionDetails = {
+            contractAddress: CONTRACT_ADDRESS,
+            functionName: "comprarBoletos",
+            args: [lotteryId, selectedNumbers],
+            value: totalCost.toString(), // La cantidad de WLD como valor de la transacción
+        };
 
-            // Esperamos que la transacción se confirme
-            await tx.wait();
+        const response = await sendTransaction(transactionDetails);
 
+        if (response) {
             alert("✅ ¡Boletos comprados exitosamente!");
-
-            // Limpiar la selección después de comprar
             setSelectedNumbers([]);
-            
-            // Actualizamos la lista de compradores después de la transacción
+            const contract = await getLotteryContract();
             const buyers: string[] = await contract.verCompradores(lotteryId);
             const purchased: number[] = buyers
                 .map((addr, idx) => (addr !== ethers.ZeroAddress ? idx : null))
                 .filter((v) => v !== null) as number[];
             setPurchasedNumbers(purchased);
-
+        }
         } catch (error) {
-            console.error(error);
-            setErrorMessage("❌ Ocurrió un error al comprar los boletos.");
+        console.error(error);
+        setErrorMessage("❌ Ocurrió un error al comprar los boletos.");
         } finally {
-            setIsLoading(false);
+        setIsLoading(false);
         }
     };
 
     return (
         <div className="relative w-full h-screen overflow-hidden">
-            {/* Fondo fijo */}
-            <div
-                className="absolute inset-0 bg-no-repeat bg-cover bg-center z-0"
-                style={{ backgroundImage: `url(${lottery.backgroundImage})` }}
-            />
+        {/* Fondo fijo */}
+        <div
+            className="absolute inset-0 bg-no-repeat bg-cover bg-center z-0"
+            style={{ backgroundImage: `url(${lottery.backgroundImage})` }}
+        />
 
-            {/* Flechita atrás funcional */}
-            <div className="fixed top-6 left-4 z-20">
-                <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 text-gray-600"
+        {/* Flechita atrás funcional */}
+        <div className="fixed top-6 left-4 z-20">
+            <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-gray-600"
+            >
+            <ArrowLeft size={24} />
+            </button>
+        </div>
+
+        {/* Título visual atrás */}
+        <div className="fixed top-0 left-0 w-full z-0 pointer-events-none">
+            {lotteryId !== null && (
+            <div className="w-full max-w-sm h-36 mt-4 mx-auto flex justify-center items-center relative">
+                <img
+                src={lottery.titleImage}
+                alt="Fondo título"
+                className="absolute w-256 h-256 object-contain pt-60 mt-80"
+                />
+                <h1
+                className={`${lottery.size} font-bold pt-4 mt-40 z-10 text-center ${lottery.textColor}`}
                 >
-                    <ArrowLeft size={24} />
-                </button>
+                ID #{lotteryId}.{" "}
+                {
+                    messages[language][
+                    `lottery_${type}` as keyof typeof messages["en"]
+                    ]
+                }
+                </h1>
             </div>
-
-            {/* Título visual atrás */}
-            <div className="fixed top-0 left-0 w-full z-0 pointer-events-none">
-                {lotteryId !== null && (
-                    <div className="w-full max-w-sm h-36 mt-4 mx-auto flex justify-center items-center relative">
-                        <img
-                            src={lottery.titleImage}
-                            alt="Fondo título"
-                            className="absolute w-256 h-256 object-contain pt-60 mt-80"
-                        />
-                        <h1
-                            className={`${lottery.size} font-bold pt-4 mt-40 z-10 text-center ${lottery.textColor}`}
-                        >
-                            ID #{lotteryId}.{" "}
-                            {messages[language][`lottery_${type}` as keyof typeof messages["en"]]}
-                        </h1>
-                    </div>
-                )}
-
-                <div className="flex flex-col items-center mt-20">
-                    {/* Precio */}
-                    <div className="relative inline-block text-center">
-                        <span
-                            className="absolute inset-0 text-2xl font-black uppercase underline"
-                            style={{
-                                WebkitTextStroke: "8px white",
-                                color: "transparent",
-                            }}
-                            aria-hidden="true"
-                        >
-                            {messages[language].price} ${lottery.price}
-                        </span>
-                        <span className="relative text-2xl font-black uppercase underline">
-                            {messages[language].price} ${lottery.price}
-                        </span>
-                    </div>
-
-                    {/* Premio */}
-                    <div className="relative inline-block text-center">
-                        <span
-                            className="absolute inset-0 text-2xl font-black uppercase underline"
-                            style={{
-                                WebkitTextStroke: "8px white",
-                                color: "transparent",
-                            }}
-                            aria-hidden="true"
-                        >
-                            {messages[language].prize} ${lottery.prize}
-                        </span>
-                        <span className="relative text-2xl font-black uppercase underline">
-                            {messages[language].prize} ${lottery.prize}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Contenido principal scrollable */}
-            <div className="relative z-10 w-full h-full overflow-y-auto pt-40 mt-40 px-6">
-                <div
-                    className={`grid grid-cols-5 gap-2 p-4 ${lottery.boColor} ${lottery.color} shadow-md rounded-xl border-4 h-[300px] overflow-y-scroll`}
-                >
-                    {numbers.map((num) => {
-                        const isPurchased = purchasedNumbers.includes(num);
-                        const isSelected = selectedNumbers.includes(num);
-                        return (
-                            <button
-                                key={num}
-                                disabled={isPurchased}
-                                onClick={() => toggleNumberSelection(num)}
-                                className={`w-12 h-12 flex items-center justify-center border rounded-xl text-lg font-bold
-                                ${
-                                    isPurchased
-                                        ? lottery.boColor
-                                        : isSelected
-                                        ? lottery.selectColor
-                                        : "bg-white"
-                                }
-                                ${isPurchased ? "opacity-10 cursor-not-allowed" : ""}
-                                `}
-                            >
-                                {num.toString().padStart(2, "0")}
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Mensaje de error */}
-            {errorMessage && (
-                <div className="absolute bottom-10 w-full text-center text-red-500">
-                    <p>{errorMessage}</p>
-                </div>
             )}
 
-            {/* Botón de Comprar */}
-            <div className="fixed bottom-20 w-full flex justify-center z-20">
+            <div className="flex flex-col items-center mt-20">
+            {/* Precio */}
+            <div className="relative inline-block text-center">
+                <span
+                className="absolute inset-0 text-2xl font-black uppercase underline"
+                style={{
+                    WebkitTextStroke: "8px white",
+                    color: "transparent",
+                }}
+                aria-hidden="true"
+                >
+                {messages[language].price} ${lottery.price}
+                </span>
+                <span className="relative text-2xl font-black uppercase underline">
+                {messages[language].price} ${lottery.price}
+                </span>
+            </div>
+
+            {/* Premio */}
+            <div className="relative inline-block text-center">
+                <span
+                className="absolute inset-0 text-2xl font-black uppercase underline"
+                style={{
+                    WebkitTextStroke: "8px white",
+                    color: "transparent",
+                }}
+                aria-hidden="true"
+                >
+                {messages[language].prize} ${lottery.prize}
+                </span>
+                <span className="relative text-2xl font-black uppercase underline">
+                {messages[language].prize} ${lottery.prize}
+                </span>
+            </div>
+        </div>
+    </div>
+
+        {/* Contenido principal scrollable */}
+        <div className="relative z-10 w-full h-full overflow-y-auto pt-40 mt-40 px-6">
+        <div
+            className={`grid grid-cols-5 gap-2 p-4 ${lottery.boColor} ${lottery.color} shadow-md rounded-xl border-4 h-[300px] overflow-y-scroll`}
+        >
+            {numbers.map((num) => {
+                const isPurchased = purchasedNumbers.includes(num);
+                const isSelected = selectedNumbers.includes(num);
+                return (
                 <button
+                    key={num}
+                    disabled={isPurchased}
+                    onClick={() => toggleNumberSelection(num)}
+                    className={`w-12 h-12 flex items-center justify-center border rounded-xl text-lg font-bold
+                    ${
+                        isPurchased
+                        ? lottery.boColor
+                        : isSelected
+                        ? lottery.selectColor
+                        : "bg-white"
+                    }
+                    ${isPurchased ? "opacity-10 cursor-not-allowed" : ""}`}
+                >
+                    {num.toString().padStart(2, "0")}
+                </button>
+                );
+            })}
+            </div>
+
+            {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
+
+            <div className="flex flex-col items-center gap-4 mt-6">
+                <button
+                    className="bg-[#38b6ff] text-xl text-white px-6 py-2 disabled:bg-gray-400 rounded-xl w-64 max-w-xs"
                     onClick={buyTickets}
                     disabled={isLoading}
-                    className={`py-2 px-4 bg-blue-600 rounded-xl text-white ${
-                        isLoading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
                 >
-                    {isLoading ? "Procesando..." : "Comprar boletos"}
+                    {isLoading ? messages[language].purchasing : messages[language].buy_ticket}
                 </button>
-            </div>
+
+                <button
+                    className="bg-[#ff914d] text-xl text-white px-6 py-2 rounded-xl w-64 max-w-xs"
+                    onClick={clearSelection}
+                >
+                    {messages[language].clear_selection}
+                </button>
+                </div>
+        </div>
         </div>
     );
 }

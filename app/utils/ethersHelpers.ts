@@ -8,7 +8,7 @@ declare global {
 }
 
 // Dirección del contrato desplegado en Worldchain Mainnet
-const CONTRACT_ADDRESS = "0x549473b818B1712d21f029E7856b7498Ba650178";
+export const CONTRACT_ADDRESS = "0x549473b818B1712d21f029E7856b7498Ba650178";
 
 // ABI del contrato
 export const LOTTERY_ABI = [
