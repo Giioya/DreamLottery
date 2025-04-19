@@ -9,26 +9,25 @@ export default function LoginPage() {
     const router = useRouter();
 
     useEffect(() => {
-        const tryLogin = async () => {
-            const isWorldApp = window?.navigator?.userAgent.includes('WorldApp');
-            if (isWorldApp && !isAuthenticated) {
-                await signInWithWallet();
-            }
-        };
-
-        tryLogin();
-    }, [isAuthenticated, signInWithWallet]);
-
-    // Nuevo useEffect aparte: cuando realmente ya esté autenticado, ahí sí redirigimos
-    useEffect(() => {
         if (isAuthenticated) {
             router.push('/');
         }
     }, [isAuthenticated, router]);
 
+    const handleLogin = async () => {
+        await signInWithWallet();
+        // El useEffect de arriba redirigirá automáticamente si el login fue exitoso
+    };
+
     return (
-        <main className="min-h-screen flex items-center justify-center bg-white">
-            <h1 className="text-xl font-bold">Conectando tu Wallet...</h1>
+        <main className="min-h-screen flex flex-col items-center justify-center bg-white space-y-4">
+            <h1 className="text-xl font-bold">Inicia sesión en Dream Lottery</h1>
+            <button
+                onClick={handleLogin}
+                className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-semibold hover:bg-blue-700 transition"
+            >
+                Iniciar sesión
+            </button>
         </main>
     );
 }
