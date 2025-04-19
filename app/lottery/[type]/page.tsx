@@ -171,7 +171,7 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
     };
 
     return (
-        <div className="relative w-full h-screen overflow-hidden">
+        <div className="relative w-full h-screen overflow-y-auto"> {/* Hacemos la página desplazable */}
             {/* Fondo fijo */}
             <div
                 className="absolute inset-0 bg-no-repeat bg-cover bg-center z-0"
@@ -248,9 +248,9 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
             </div>
 
             {/* Contenido principal scrollable */}
-            <div className="relative z-10 w-full h-full overflow-y-auto pt-40 mt-40 px-6 pb-24">
+            <div className="relative z-10 w-full h-auto pt-40 mt-40 px-6 pb-24">
                 <div
-                    className={`grid grid-cols-5 gap-2 p-4 ${lottery.boColor} ${lottery.color} shadow-md rounded-xl border-4 h-[calc(100vh-200px)] overflow-auto`} // Ajusta el alto para permitir el scroll
+                    className={`grid grid-cols-5 gap-2 p-4 ${lottery.boColor} ${lottery.color} shadow-md rounded-xl border-4 h-[300px]`}
                 >
                     {numbers.map((num) => {
                         const isPurchased = purchasedNumbers.includes(num);
