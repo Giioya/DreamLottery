@@ -84,12 +84,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Solo intentar login automático si detectamos World App
-    const isWorldApp = window?.navigator?.userAgent.includes('WorldApp')
+    const isWorldApp = typeof window !== 'undefined' && window.navigator.userAgent.includes('WorldApp/')
     if (isWorldApp && !isAuthenticated) {
       signInWithWallet();
     }
   }, [isAuthenticated, signInWithWallet]);
+  
 
   return (
     <main {...handlers} className="min-h-screen relative flex items-center justify-center overflow-hidden">
