@@ -7,7 +7,8 @@ import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
-import { getLotteryContract } from "@/app/utils/ethersHelpers"; // 👈 Importante
+import { getLotteryContract } from "@/app/utils/ethersHelpers";
+import { MiniKit } from "@worldcoin/minikit-js"; // 👈 Importamos MiniKit
 
 export default function Home() {
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
@@ -17,6 +18,9 @@ export default function Home() {
   const [fade, setFade] = useState(false);
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 👈 Estado de login
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
@@ -25,7 +29,7 @@ export default function Home() {
     { key: "saphire", link: "/lottery/saphire", price: "5 WLD", mainBg: "mythic.jpg", button: "bg-[#d5f0ff]", border: "border-[#3554f7]", color: "text-[#3554f7]", bgColor: "bg-white/70", prize: "400 WLD" },
     { key: "diamond", link: "/lottery/diamond", price: "10 WLD", mainBg: "divine.jpg", button: "bg-[#fff5fb]", border: "border-[#4b002a]", color: "text-[#4b002a]", bgColor: "bg-white/70", prize: "800 WLD" },
   ];
-  
+
   useEffect(() => {
     setFade(true);
     setTimeout(() => {
@@ -81,6 +85,49 @@ export default function Home() {
     fetchActivas();
   }, []);
 
+  const signInWithWallet = async () => {
+    if (!MiniKit.isInstalled()) {
+      alert('Por favor abre esta página desde World App');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/nonce`);
+      const { nonce } = await res.json();
+
+      const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
+        nonce: nonce,
+        requestId: '0',
+        expirationTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
+        notBefore: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
+        statement: 'Autenticación en Dream Lottery',
+      });
+
+      if (finalPayload.status === 'error') {
+        console.error("Error en Wallet Auth");
+        return;
+      }
+
+      const response = await fetch('/api/complete-siwe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payload: finalPayload, nonce }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success' && data.isValid) {
+        setIsLoggedIn(true);
+        setWalletAddress(MiniKit.walletAddress);
+        setUsername(MiniKit.user?.username ?? null);
+      } else {
+        console.error("Error al validar SIWE");
+      }
+    } catch (error) {
+      console.error("Error en Wallet Auth:", error);
+    }
+  };
+
   return (
     <main {...handlers} className="min-h-screen relative flex items-center justify-center overflow-hidden">
       <div
@@ -95,10 +142,26 @@ export default function Home() {
 
       <Idiomas />
 
+      {/* Botón de Conectar Wallet */}
+      <div className="absolute top-4 right-6 z-20">
+        {!isLoggedIn ? (
+          <button
+            onClick={signInWithWallet}
+            className="bg-white text-black font-bold py-2 px-4 rounded-full shadow-md hover:bg-gray-300 transition"
+          >
+            Conectar billetera
+          </button>
+        ) : (
+          <div className="bg-white text-black font-bold py-2 px-4 rounded-full shadow-md">
+            {username ? `👋 ${username}` : `👛 ${walletAddress?.slice(0, 6)}...${walletAddress?.slice(-4)}`}
+          </div>
+        )}
+      </div>
+
       {/* Imagen título centrada */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
         <img
-          src="/images/main_title.png" // 👈 asegúrate de que la ruta y el nombre del archivo estén correctos
+          src="/images/main_title.png"
           alt="Título de la Lotería"
           className="w-96 h-40"
         />
