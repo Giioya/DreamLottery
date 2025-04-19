@@ -150,18 +150,26 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
             const priceInWei = ethers.parseEther(lottery.price);
             const totalCost = priceInWei * BigInt(selectedNumbers.length);
 
+            // Aquí es donde se envía la transacción
             const tx = await contract.comprarBoletos(lotteryId, selectedNumbers, {
                 value: totalCost,
             });
+
+            // Esperamos que la transacción se confirme
             await tx.wait();
 
             alert("✅ ¡Boletos comprados exitosamente!");
+
+            // Limpiar la selección después de comprar
             setSelectedNumbers([]);
+            
+            // Actualizamos la lista de compradores después de la transacción
             const buyers: string[] = await contract.verCompradores(lotteryId);
             const purchased: number[] = buyers
                 .map((addr, idx) => (addr !== ethers.ZeroAddress ? idx : null))
                 .filter((v) => v !== null) as number[];
             setPurchasedNumbers(purchased);
+
         } catch (error) {
             console.error(error);
             setErrorMessage("❌ Ocurrió un error al comprar los boletos.");
@@ -201,11 +209,7 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
                             className={`${lottery.size} font-bold pt-4 mt-40 z-10 text-center ${lottery.textColor}`}
                         >
                             ID #{lotteryId}.{" "}
-                            {
-                                messages[language][
-                                    `lottery_${type}` as keyof typeof messages["en"]
-                                ]
-                            }
+                            {messages[language][`lottery_${type}` as keyof typeof messages["en"]]}
                         </h1>
                     </div>
                 )}
@@ -261,14 +265,14 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
                                 disabled={isPurchased}
                                 onClick={() => toggleNumberSelection(num)}
                                 className={`w-12 h-12 flex items-center justify-center border rounded-xl text-lg font-bold
-                                    ${
-                                        isPurchased
-                                            ? lottery.boColor
-                                            : isSelected
-                                            ? lottery.selectColor
-                                            : "bg-white"
-                                    }
-                                    ${isPurchased ? "opacity-10 cursor-not-allowed" : ""}
+                                ${
+                                    isPurchased
+                                        ? lottery.boColor
+                                        : isSelected
+                                        ? lottery.selectColor
+                                        : "bg-white"
+                                }
+                                ${isPurchased ? "opacity-10 cursor-not-allowed" : ""}
                                 `}
                             >
                                 {num.toString().padStart(2, "0")}
@@ -276,25 +280,26 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
                         );
                     })}
                 </div>
+            </div>
 
-                {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
-
-                <div className="flex flex-col items-center gap-4 mt-6">
-                    <button
-                        className="bg-[#38b6ff] text-xl text-white px-6 py-2 disabled:bg-gray-400 rounded-xl w-64 max-w-xs"
-                        onClick={buyTickets}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? messages[language].purchasing : messages[language].buy_ticket}
-                    </button>
-
-                    <button
-                        className="bg-[#ff914d] text-xl text-white px-6 py-2 rounded-xl w-64 max-w-xs"
-                        onClick={clearSelection}
-                    >
-                        {messages[language].clear_selection}
-                    </button>
+            {/* Mensaje de error */}
+            {errorMessage && (
+                <div className="absolute bottom-10 w-full text-center text-red-500">
+                    <p>{errorMessage}</p>
                 </div>
+            )}
+
+            {/* Botón de Comprar */}
+            <div className="fixed bottom-20 w-full flex justify-center z-20">
+                <button
+                    onClick={buyTickets}
+                    disabled={isLoading}
+                    className={`py-2 px-4 bg-blue-600 rounded-xl text-white ${
+                        isLoading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                >
+                    {isLoading ? "Procesando..." : "Comprar boletos"}
+                </button>
             </div>
         </div>
     );
