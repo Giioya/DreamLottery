@@ -1,20 +1,15 @@
 "use client";
 
 import { useContext, useRef, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useWalletAuth } from "@/components/wallet/WalletAuthContext";
 import Idiomas from "@/components/Idiomas";
 import { messages } from "@/data/translations";
 import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
-import { getLotteryContract } from "@/app/utils/ethersHelpers";
-import Image from "next/image"; // Importa el componente Image de Next.js
+import { getLotteryContract } from "@/app/utils/ethersHelpers"; // 👈 Importante
 
 export default function Home() {
-  const { isAuthenticated, loading } = useWalletAuth();
-  const router = useRouter();
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,18 +17,6 @@ export default function Home() {
   const [fade, setFade] = useState(false);
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
-
-  useEffect(() => {
-    if (!loading) { // Espera a que termine de cargar
-      if (!isAuthenticated) {
-        router.push("/login");
-      }
-    }
-  }, [loading, isAuthenticated, router]);
-
-  if (loading) {
-    return <div>Cargando...</div>; // o un spinner bonito si quieres
-  }
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
@@ -88,7 +71,7 @@ export default function Home() {
             total: Number(l.totalBoletos),
           };
           return acc;
-        }, {}); 
+        }, {});
         setLoteriasActivas(parsed);
       } catch (error) {
         console.error("Error al obtener boletos vendidos:", error);
@@ -114,11 +97,10 @@ export default function Home() {
 
       {/* Imagen título centrada */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
-        <Image
-          src="/images/main_title.png" // Asegúrate de que la ruta y el nombre del archivo estén correctos
+        <img
+          src="/images/main_title.png" // 👈 asegúrate de que la ruta y el nombre del archivo estén correctos
           alt="Título de la Lotería"
-          width={384}  // Ajusta el tamaño de la imagen
-          height={160} // Ajusta el tamaño de la imagen
+          className="w-96 h-40"
         />
       </div>
 
