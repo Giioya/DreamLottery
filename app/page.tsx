@@ -1,65 +1,22 @@
 "use client";
 
 import { useContext, useRef, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useWalletAuth } from "@/components/wallet/WalletAuthContext";
 import Idiomas from "@/components/Idiomas";
 import { messages } from "@/data/translations";
 import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
-import { getLotteryContract } from "@/app/utils/ethersHelpers";
-import Image from "next/image"; // Usamos el componente Image de Next.js
+import { getLotteryContract } from "@/app/utils/ethersHelpers"; // 👈 Importante
 
 export default function Home() {
-  const { isAuthenticated, walletAddress, loading } = useWalletAuth();  // Ahora obtenemos walletAddress
-  const router = useRouter();
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [bgImage, setBgImage] = useState(`/images/rare.jpg`);
+  const [bgImage, setBgImage] = useState(``);
   const [fade, setFade] = useState(false);
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
-  const [saldoDisponible, setSaldoDisponible] = useState<string | null>(null);  // Estado para el saldo de la billetera
-
-  // `useEffect` para redirigir a login si no está autenticado
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push("/login");
-    } else {
-      // Si está autenticado, puedes obtener el saldo disponible de la billetera
-      if (walletAddress) {
-        getBalance(walletAddress).then((saldo) => {
-          setSaldoDisponible(saldo); // Maneja el saldo en el estado
-        });
-      }
-    }
-  }, [loading, isAuthenticated, walletAddress, router]);
-
-  // Cargar los detalles de las loterías activas
-  useEffect(() => {
-    const fetchActivas = async () => {
-      try {
-        const contract = await getLotteryContract();
-        const result = await contract.verLoteriasActivas();
-
-        const parsed = result.reduce((acc: any, l: any) => {
-          acc[l.nombre.toLowerCase()] = {
-            vendidos: Number(l.boletosVendidos),
-            total: Number(l.totalBoletos),
-          };
-          return acc;
-        }, {});        
-        setLoteriasActivas(parsed);
-      } catch (error) {
-        console.error("Error al obtener boletos vendidos:", error);
-      }
-    };
-
-    fetchActivas();
-  }, []); // Se ejecuta una vez cuando el componente se monta
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
@@ -68,7 +25,7 @@ export default function Home() {
     { key: "saphire", link: "/lottery/saphire", price: "5 WLD", mainBg: "mythic.jpg", button: "bg-[#d5f0ff]", border: "border-[#3554f7]", color: "text-[#3554f7]", bgColor: "bg-white/70", prize: "400 WLD" },
     { key: "diamond", link: "/lottery/diamond", price: "10 WLD", mainBg: "divine.jpg", button: "bg-[#fff5fb]", border: "border-[#4b002a]", color: "text-[#4b002a]", bgColor: "bg-white/70", prize: "800 WLD" },
   ];
-
+  
   useEffect(() => {
     setFade(true);
     setTimeout(() => {
@@ -102,6 +59,28 @@ export default function Home() {
     preventScrollOnSwipe: true,
   });
 
+  useEffect(() => {
+    const fetchActivas = async () => {
+      try {
+        const contract = await getLotteryContract();
+        const result = await contract.verLoteriasActivas();
+
+        const parsed = result.reduce((acc: any, l: any) => {
+          acc[l.nombre.toLowerCase()] = {
+            vendidos: Number(l.boletosVendidos),
+            total: Number(l.totalBoletos),
+          };
+          return acc;
+        }, {});
+        setLoteriasActivas(parsed);
+      } catch (error) {
+        console.error("Error al obtener boletos vendidos:", error);
+      }
+    };
+
+    fetchActivas();
+  }, []);
+
   return (
     <main {...handlers} className="min-h-screen relative flex items-center justify-center overflow-hidden">
       <div
@@ -113,15 +92,15 @@ export default function Home() {
           backgroundAttachment: "fixed",
         }}
       />
+
       <Idiomas />
 
       {/* Imagen título centrada */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
-        <Image
-          src="/images/main_title.png"
+        <img
+          src="/images/main_title.png" // 👈 asegúrate de que la ruta y el nombre del archivo estén correctos
           alt="Título de la Lotería"
-          width={384}
-          height={160}
+          className="w-96 h-40"
         />
       </div>
 
@@ -148,26 +127,12 @@ export default function Home() {
                     {messages[language].enter_draw}
                   </button>
                 </Link>
-                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>
+                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>            
               </motion.div>
             );
           })}
         </div>
       </div>
-
-      {/* Mostrar información de billetera si está autenticado */}
-      {isAuthenticated && walletAddress && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 text-white">
-          <p>Billetera conectada: {walletAddress}</p>
-          {saldoDisponible !== null && <p>Saldo disponible: {saldoDisponible} WLD</p>}
-        </div>
-      )}
     </main>
   );
-}
-
-async function getBalance(walletAddress: string) {
-  const contract = await getLotteryContract();
-  const balance = await contract.balanceOf(walletAddress);
-  return balance.toString(); // Convierte el saldo a cadena
 }

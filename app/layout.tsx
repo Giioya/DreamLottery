@@ -10,7 +10,7 @@ import LanguageSelector from "@/components/Idiomas";
 import { messages } from "@/data/translations";
 import LanguageProvider, { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import { ReactNode, useContext } from "react";
-import { WalletAuthProvider } from '@/components/wallet/WalletAuthContext'
+import AuthGuard from "@/components/AuthGuard"; 
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,17 +18,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen flex flex-col`}>
+      <AuthGuard> {/* 🔒 Protege toda la app */}
         <NextAuthProvider>
           <ErudaProviderClient>
             <MiniKitProvider>
               <LanguageProvider>
-                <WalletAuthProvider>
                   <LayoutContent>{children}</LayoutContent>
-                </WalletAuthProvider>
               </LanguageProvider>
             </MiniKitProvider>
           </ErudaProviderClient>
         </NextAuthProvider>
+      </AuthGuard>
       </body>
     </html>
   );

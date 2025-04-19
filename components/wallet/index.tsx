@@ -94,15 +94,3 @@ export function useWalletAuth() {
 
     return { walletAddress, username, signInWithWallet, isLoading };
 }
-
-
-
-
-
-
-
-
-
-
-
-
