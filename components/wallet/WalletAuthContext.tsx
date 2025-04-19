@@ -7,6 +7,7 @@ interface WalletAuthContextType {
     isAuthenticated: boolean
     walletAddress: string | null
     username: string | null
+    loading: boolean // NUEVO
     signInWithWallet: () => Promise<void>
 }
 
@@ -18,17 +19,20 @@ export const WalletAuthProvider = ({ children }: { children: React.ReactNode }) 
     const [username, setUsername] = useState<string | null>(null)
 
     // Recuperar sesión al cargar
-    useEffect(() => {
-        const storedAuth = localStorage.getItem('isAuthenticated');
-        const storedAddress = localStorage.getItem('walletAddress');
-        const storedUsername = localStorage.getItem('username');
+    const [loading, setLoading] = useState(true); // NUEVO
 
-        if (storedAuth === 'true' && storedAddress) {
-            setIsAuthenticated(true);
-            setWalletAddress(storedAddress);
-            setUsername(storedUsername);
-        }
-    }, []);
+        useEffect(() => {
+            const storedAuth = localStorage.getItem('isAuthenticated');
+            const storedAddress = localStorage.getItem('walletAddress');
+            const storedUsername = localStorage.getItem('username');
+
+            if (storedAuth === 'true' && storedAddress) {
+                setIsAuthenticated(true);
+                setWalletAddress(storedAddress);
+                setUsername(storedUsername);
+            }
+            setLoading(false); // Cuando termina de intentar recuperar
+        }, []);
 
     const signInWithWallet = async () => {
         if (!MiniKit.isInstalled()) {
@@ -79,7 +83,7 @@ export const WalletAuthProvider = ({ children }: { children: React.ReactNode }) 
     }
 
     return (
-        <WalletAuthContext.Provider value={{ isAuthenticated, walletAddress, username, signInWithWallet }}>
+        <WalletAuthContext.Provider value={{ isAuthenticated, walletAddress, username, loading, signInWithWallet }}>
             {children}
         </WalletAuthContext.Provider>
     )

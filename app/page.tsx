@@ -12,7 +12,7 @@ import { useSwipeable } from "react-swipeable";
 import { getLotteryContract } from "@/app/utils/ethersHelpers";
 
 export default function Home() {
-  const { isAuthenticated } = useWalletAuth(); // 👈 Aquí usamos el auth
+  const { isAuthenticated, loading } = useWalletAuth();
   const router = useRouter();
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -23,10 +23,16 @@ export default function Home() {
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login");
+    if (!loading) { // Espera a que termine de cargar
+      if (!isAuthenticated) {
+        router.push("/login");
+      }
     }
-  }, [isAuthenticated, router]);
+  }, [loading, isAuthenticated, router]);
+
+  if (loading) {
+    return <div>Cargando...</div>; // o un spinner bonito si quieres
+  }
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
