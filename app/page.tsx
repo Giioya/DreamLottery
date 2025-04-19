@@ -17,6 +17,8 @@ export default function Home() {
   const [fade, setFade] = useState(false);
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
+
+  // 👇 Agregamos username y walletAddress
   const [username, setUsername] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
@@ -27,7 +29,7 @@ export default function Home() {
     { key: "saphire", link: "/lottery/saphire", price: "5 WLD", mainBg: "mythic.jpg", button: "bg-[#d5f0ff]", border: "border-[#3554f7]", color: "text-[#3554f7]", bgColor: "bg-white/70", prize: "400 WLD" },
     { key: "diamond", link: "/lottery/diamond", price: "10 WLD", mainBg: "divine.jpg", button: "bg-[#fff5fb]", border: "border-[#4b002a]", color: "text-[#4b002a]", bgColor: "bg-white/70", prize: "800 WLD" },
   ];
-  
+
   useEffect(() => {
     setFade(true);
     setTimeout(() => {
@@ -85,6 +87,7 @@ export default function Home() {
 
   return (
     <main {...handlers} className="min-h-screen relative flex items-center justify-center overflow-hidden">
+      {/* Fondo dinámico */}
       <div
         className={`absolute inset-0 transition-opacity duration-500 ${fade ? "opacity-0" : "opacity-100"}`}
         style={{
@@ -95,17 +98,19 @@ export default function Home() {
         }}
       />
 
+      {/* Selector de idioma */}
       <Idiomas />
 
       {/* Imagen título centrada */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
         <img
-          src="/images/main_title.png" // 👈 asegúrate de que la ruta y el nombre del archivo estén correctos
+          src="/images/main_title.png"
           alt="Título de la Lotería"
           className="w-96 h-40"
         />
       </div>
 
+      {/* Carrusel de Loterías */}
       <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
         <div ref={scrollRef} className="flex gap-5 overflow-x-auto scroll-smooth w-full px-10 no-scrollbar snap-x snap-mandatory">
           {lotteries.map((lottery, index) => {
@@ -122,23 +127,34 @@ export default function Home() {
                 <h1 className={`text-3xl font-black mt-4 ${lottery.color} text-gradient text-center`}>
                   {messages[language][`lottery_${lottery.key}` as keyof typeof messages["en"]]}
                 </h1>
-                <p className="text-xl font-semibold mt-2 text-black underline">{messages[language].price} {lottery.price}</p>
-                <p className="text-black text-xl font-bold underline">{messages[language].prize} {lottery.prize}</p>
+                <p className="text-xl font-semibold mt-2 text-black underline">
+                  {messages[language].price} {lottery.price}
+                </p>
+                <p className="text-black text-xl font-bold underline">
+                  {messages[language].prize} {lottery.prize}
+                </p>
                 <Link href={lottery.link}>
                   <button className={`mt-6 ${lottery.button} text-black px-6 py-3 rounded-full font-semibold text-lg shadow-md hover:bg-gray-300 transition`}>
                     {messages[language].enter_draw}
                   </button>
                 </Link>
-                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>            
+                <p className="text-black mt-3 font-bold">
+                  {vendidos}/{total} {messages[language].Purchased_tickets}
+                </p>
               </motion.div>
             );
           })}
         </div>
-        {/* Contenedor abajo a la derecha para mostrar el usuario */}
-        <div className="absolute bottom-5 right-5 bg-black/50 text-white px-4 py-2 rounded-xl shadow-lg backdrop-blur-md z-20">
-          <div className="text-center text-lg font-bold">
-            {username ? `Bienvenido, ${username}` : walletAddress ? `Bienvenido, ${walletAddress.slice(0, 6)}...` : "Bienvenido"}
-          </div>
+      </div>
+
+      {/* Contenedor del Bienvenido */}
+      <div className="absolute bottom-20 right-5 bg-black/50 text-white px-4 py-2 rounded-xl shadow-lg backdrop-blur-md z-20">
+        <div className="text-center text-lg font-bold">
+          {username
+            ? `Bienvenido, ${username}`
+            : walletAddress
+              ? `Bienvenido, ${walletAddress.slice(0, 6)}...`
+              : "Bienvenido"}
         </div>
       </div>
     </main>
