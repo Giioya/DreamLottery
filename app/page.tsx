@@ -17,6 +17,8 @@ export default function Home() {
   const [fade, setFade] = useState(false);
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
+  const [username, setUsername] = useState<string | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
@@ -133,6 +135,13 @@ export default function Home() {
           })}
         </div>
       </div>
+      {/* Contenedor abajo a la derecha para mostrar el usuario */}
+        <div className="absolute bottom-5 right-5 bg-black/50 text-white px-4 py-2 rounded-xl shadow-lg backdrop-blur-md z-20">
+          <div className="text-center text-lg font-bold">
+            {username ? `Bienvenido, ${username}` : walletAddress ? `Bienvenido, ${walletAddress.slice(0, 6)}...` : "Bienvenido"}
+          </div>
+        </div>
+
     </main>
   );
 }
