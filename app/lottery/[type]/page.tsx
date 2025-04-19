@@ -7,7 +7,6 @@ import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import { getLotteryContract } from "@/app/utils/ethersHelpers";
 import { ArrowLeft } from "lucide-react";
 import { ethers } from "ethers";
-import { sendTransaction } from '@/app/utils/ethersHelpers';  // Asegúrate de importar la función
 
 const lotteryTypes = {
     quartz: {
@@ -132,7 +131,7 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
 
     const clearSelection = () => setSelectedNumbers([]);
 
-    const handleBuyTicket = async () => {
+    const buyTickets = async () => {
         if (selectedNumbers.length === 0) {
             setErrorMessage("Debes seleccionar al menos un número.");
             return;
@@ -147,19 +146,17 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
             setIsLoading(true);
             setErrorMessage("");
 
-            const transactionDetails = {
-                contractAddress: '0x549473b818B1712d21f029E7856b7498Ba650178', // Dirección del contrato
-                functionName: 'comprarBoleto', // Función a llamar
-                args: [lotteryId, selectedNumbers[0]], // Argumentos para la función, aquí tomamos el primer número seleccionado
-                value: ethers.parseUnits(lottery.price, "ether").toString(16),
-            };
+            const contract = await getLotteryContract();
+            const priceInWei = ethers.parseEther(lottery.price);
+            const totalCost = priceInWei * BigInt(selectedNumbers.length);
 
-            const result = await sendTransaction(transactionDetails);
-            console.log('Resultado de la transacción:', result);
+            const tx = await contract.comprarBoletos(lotteryId, selectedNumbers, {
+                value: totalCost.toString(16), // Aquí se hizo el cambio de toHexString() a toString(16)
+            });
+            await tx.wait();
 
             alert("✅ ¡Boletos comprados exitosamente!");
             setSelectedNumbers([]);
-            const contract = await getLotteryContract();
             const buyers: string[] = await contract.verCompradores(lotteryId);
             const purchased: number[] = buyers
                 .map((addr, idx) => (addr !== ethers.ZeroAddress ? idx : null))
@@ -206,7 +203,7 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
                             ID #{lotteryId}.{" "}
                             {
                                 messages[language][
-                                `lottery_${type}` as keyof typeof messages["en"]
+                                    `lottery_${type}` as keyof typeof messages["en"]
                                 ]
                             }
                         </h1>
@@ -251,38 +248,50 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
             </div>
 
             {/* Contenido principal scrollable */}
-            <div className="relative z-10 w-full h-full overflow-y-auto pt-40 mt-40 px-6">
+            <div className="relative z-10 w-full h-full overflow-y-auto pt-40 mt-40 px-6 pb-24">
                 <div
                     className={`grid grid-cols-5 gap-2 p-4 ${lottery.boColor} ${lottery.color} shadow-md rounded-xl border-4 h-[300px] overflow-y-scroll`}
                 >
-                    {numbers.map((number) => (
-                        <button
-                            key={number}
-                            onClick={() => toggleNumberSelection(number)}
-                            className={`${
-                                selectedNumbers.includes(number)
-                                    ? "bg-green-600 text-white"
-                                    : lottery.selectColor
-                            } ${lottery.size} rounded-md px-2 py-1`}
-                        >
-                            {number}
-                        </button>
-                    ))}
+                    {numbers.map((num) => {
+                        const isPurchased = purchasedNumbers.includes(num);
+                        const isSelected = selectedNumbers.includes(num);
+                        return (
+                            <button
+                                key={num}
+                                disabled={isPurchased}
+                                onClick={() => toggleNumberSelection(num)}
+                                className={`w-12 h-12 flex items-center justify-center border rounded-xl text-lg font-bold
+                                ${
+                                    isPurchased
+                                        ? lottery.boColor
+                                        : isSelected
+                                        ? lottery.selectColor
+                                        : "bg-white"
+                                }
+                                ${isPurchased ? "opacity-10 cursor-not-allowed" : ""}`}
+                            >
+                                {num.toString().padStart(2, "0")}
+                            </button>
+                        );
+                    })}
                 </div>
 
-                {/* Mensaje de error */}
-                {errorMessage && (
-                    <div className="text-center mt-4 text-red-500">{errorMessage}</div>
-                )}
+                {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
 
-                {/* Botón de confirmación */}
-                <div className="w-full flex justify-center mt-4">
+                <div className="flex flex-col items-center gap-4 mt-6">
                     <button
-                        onClick={handleBuyTicket}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        className="bg-[#38b6ff] text-xl text-white px-6 py-2 disabled:bg-gray-400 rounded-xl w-64 max-w-xs"
+                        onClick={buyTickets}
                         disabled={isLoading}
                     >
-                        {isLoading ? "Procesando..." : "Comprar Boletos"}
+                        {isLoading ? messages[language].purchasing : messages[language].buy_ticket}
+                    </button>
+
+                    <button
+                        className="bg-[#ff914d] text-xl text-white px-6 py-2 rounded-xl w-64 max-w-xs"
+                        onClick={clearSelection}
+                    >
+                        {messages[language].clear_selection}
                     </button>
                 </div>
             </div>

@@ -25,11 +25,11 @@ export default function Home() {
   const [saldo, setSaldo] = useState<string | null>(null);
 
   const lotteries = [
-    { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
-    { key: "citrine", link: "/lottery/citrine", price: "1 WLD", mainBg: "epic.jpg", button: "bg-[#ffefbd]", border: "border-[#ff6c01]", color: "text-[#ff6c01]", bgColor: "bg-white/70", prize: "80 WLD" },
-    { key: "amethyst", link: "/lottery/amethyst", price: "3 WLD", mainBg: "legendary.jpg", button: "bg-[#f7ecff]", border: "border-[#903eca]", color: "text-[#903eca]", bgColor: "bg-white/70", prize: "240 WLD" },
-    { key: "saphire", link: "/lottery/saphire", price: "5 WLD", mainBg: "mythic.jpg", button: "bg-[#d5f0ff]", border: "border-[#3554f7]", color: "text-[#3554f7]", bgColor: "bg-white/70", prize: "400 WLD" },
-    { key: "diamond", link: "/lottery/diamond", price: "10 WLD", mainBg: "divine.jpg", button: "bg-[#fff5fb]", border: "border-[#4b002a]", color: "text-[#4b002a]", bgColor: "bg-white/70", prize: "800 WLD" },
+    { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
+    { key: "citrine", link: "/lottery/citrine", price: "1 WLD", mainBg: "citrine.jpg", button: "bg-[#ffefbd]", border: "border-[#ff6c01]", color: "text-[#ff6c01]", bgColor: "bg-white/70", prize: "80 WLD" },
+    { key: "amethyst", link: "/lottery/amethyst", price: "3 WLD", mainBg: "amethyst.jpg", button: "bg-[#f7ecff]", border: "border-[#903eca]", color: "text-[#903eca]", bgColor: "bg-white/70", prize: "240 WLD" },
+    { key: "saphire", link: "/lottery/saphire", price: "5 WLD", mainBg: "sapphire.jpg", button: "bg-[#d5f0ff]", border: "border-[#3554f7]", color: "text-[#3554f7]", bgColor: "bg-white/70", prize: "400 WLD" },
+    { key: "diamond", link: "/lottery/diamond", price: "10 WLD", mainBg: "diamond.jpg", button: "bg-[#fff5fb]", border: "border-[#4b002a]", color: "text-[#4b002a]", bgColor: "bg-white/70", prize: "800 WLD" },
   ];
 
   useEffect(() => {
