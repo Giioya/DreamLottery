@@ -148,7 +148,16 @@ export default function Home() {
       </div>
 
       {/* Contenedor del Bienvenido */}
-      <div className="absolute bottom-20 right-5 bg-black/50 text-white px-4 py-2 rounded-xl shadow-lg backdrop-blur-md z-20">
+      <div className="absolute bottom-20 right-5 bg-black/50 text-white px-4 py-2 rounded-xl shadow-lg backdrop-blur-md z-20 flex flex-col items-center">
+        <button
+          className="mb-2 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-full shadow-md transition"
+          onClick={() => {
+            localStorage.clear();
+            window.location.reload(); // recarga la página después de borrar
+          }}
+        >
+          Borrar Datos
+        </button>
         <div className="text-center text-lg font-bold">
           {username
             ? `Bienvenido, ${username}`
