@@ -1,15 +1,16 @@
 import { ethers } from "ethers";
+import { MiniKit } from "@worldcoin/minikit-js"; // Importamos MiniKit
 
 declare global {
     interface Window {
         ethereum?: any;
-        }
     }
+}
 
-// Dirección del contrato desplegado en Worldchain Sepolia
+// Dirección del contrato desplegado en Worldchain Mainnet
 const CONTRACT_ADDRESS = "0x549473b818B1712d21f029E7856b7498Ba650178";
 
-// ABI extraído directamente del contrato
+// ABI del contrato
 export const LOTTERY_ABI = [
     "function comprarBoleto(uint256 _loteriaId, uint8 _numero) external payable",
     "function comprarBoletos(uint256 _loteriaId, uint8[] _numeros) external payable",
@@ -21,26 +22,59 @@ export const LOTTERY_ABI = [
     "function loterias(uint256) external view returns (string nombre, uint256 precio, uint8 totalBoletos, uint8 boletosVendidos, bool cerrada, uint8 numeroGanador, uint256 id)",
     "function owner() external view returns (address)",
     "function verLoteriasActivas() external view returns (tuple(uint256 id, string nombre, uint8 boletosVendidos, uint8 totalBoletos, bool cerrada)[])",
+    "function rescatarPremio(uint256 _loteriaId) external",
     "event BoletoComprado(uint256 indexed id, address indexed comprador, uint8 numero)",
     "event LoteriaCerrada(uint256 indexed id, uint8 numeroGanador, address ganador, uint256 premio)",
-    "function rescatarPremio(uint256 _loteriaId) external",
-    ];
+];
 
-const RPC_URL = "worldchain-mainnet.g.alchemy.com/public"; // ✅ Mejor que el de Alchemy para World Chain directa
+// Provider de solo lectura usando el RPC oficial de World Chain
+export const publicProvider = new ethers.JsonRpcProvider("https://worldchain-mainnet.g.alchemy.com/public");
 
-// Crear instancia de provider público
-const publicProvider = new ethers.JsonRpcProvider(RPC_URL);
-
-// Función para obtener el contrato
+// Función para obtener el contrato (conectado o en solo lectura)
 export const getLotteryContract = async () => {
-    if (typeof window !== "undefined" && (window as any).ethereum?.isWorldApp) {
-        const provider = new ethers.BrowserProvider((window as any).ethereum);
-        const signer = await provider.getSigner();
-        return new ethers.Contract(CONTRACT_ADDRESS, LOTTERY_ABI, signer);
+    if (typeof window !== "undefined" && window.ethereum) {
+        try {
+            // Verificamos si el usuario tiene la billetera de Worldcoin instalada (MiniKit)
+            if (MiniKit.isInstalled()) {
+                // Si MiniKit está instalado, utilizamos la billetera de Worldcoin para la interacción
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                return new ethers.Contract(CONTRACT_ADDRESS, LOTTERY_ABI, signer);
+            } else {
+                // Si MiniKit no está disponible, usamos la billetera tradicional si está conectada
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                return new ethers.Contract(CONTRACT_ADDRESS, LOTTERY_ABI, signer);
+            }
+        } catch (error) {
+            console.error("Error al conectar wallet:", error);
+            // Si ocurre un error, usamos el proveedor público para solo lecturas
+            return new ethers.Contract(CONTRACT_ADDRESS, LOTTERY_ABI, publicProvider);
+        }
     } else {
-        // Si no está World App, solo lectura pública
+        // Si no se detecta billetera, usamos el proveedor público
+        console.log("No wallet detectada, usando provider público");
         return new ethers.Contract(CONTRACT_ADDRESS, LOTTERY_ABI, publicProvider);
     }
-    };
+};
 
-export const provider = new ethers.JsonRpcProvider("https://worldchain-mainnet.g.alchemy.com/public");
+// Función para forzar la conexión de la Wallet (como lo haces con MiniKit)
+export const connectWallet = async () => {
+    if (typeof window !== "undefined" && window.ethereum) {
+        try {
+            // Verificamos si el usuario tiene la billetera de Worldcoin instalada
+            if (!MiniKit.isInstalled()) {
+                alert('Por favor abre esta página desde World App');
+                return;
+            }
+
+            // Solicitamos la conexión de la billetera
+            await window.ethereum.request({ method: "eth_requestAccounts" });
+            console.log("Wallet conectada");
+        } catch (error) {
+            console.error("Error al solicitar conexión:", error);
+        }
+    } else {
+        console.error("No wallet detectada en el navegador");
+    }
+};

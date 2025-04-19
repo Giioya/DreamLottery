@@ -10,6 +10,7 @@ import LanguageSelector from "@/components/Idiomas";
 import { messages } from "@/data/translations";
 import LanguageProvider, { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import { ReactNode, useContext } from "react";
+import { AuthProvider } from "@/components/Auth/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <ErudaProviderClient>
             <MiniKitProvider>
               <LanguageProvider>
-                <LayoutContent>{children}</LayoutContent>
+                <AuthProvider>
+                  <LayoutContent>{children}</LayoutContent>
+                </AuthProvider>
               </LanguageProvider>
             </MiniKitProvider>
           </ErudaProviderClient>

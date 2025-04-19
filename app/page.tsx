@@ -7,8 +7,7 @@ import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
-import { getLotteryContract } from "@/app/utils/ethersHelpers";
-import { MiniKit } from "@worldcoin/minikit-js"; // 👈 Importamos MiniKit
+import { getLotteryContract, connectWallet } from "@/app/utils/ethersHelpers"; // 👈 Importante
 
 export default function Home() {
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
@@ -18,9 +17,7 @@ export default function Home() {
   const [fade, setFade] = useState(false);
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 👈 Estado de login
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+  const [walletConnected, setWalletConnected] = useState(false); // Estado para verificar si la billetera está conectada
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
@@ -63,69 +60,37 @@ export default function Home() {
     preventScrollOnSwipe: true,
   });
 
-  useEffect(() => {
-    const fetchActivas = async () => {
-      try {
-        const contract = await getLotteryContract();
-        const result = await contract.verLoteriasActivas();
-
-        const parsed = result.reduce((acc: any, l: any) => {
-          acc[l.nombre.toLowerCase()] = {
-            vendidos: Number(l.boletosVendidos),
-            total: Number(l.totalBoletos),
-          };
-          return acc;
-        }, {});
-        setLoteriasActivas(parsed);
-      } catch (error) {
-        console.error("Error al obtener boletos vendidos:", error);
-      }
-    };
-
-    fetchActivas();
-  }, []);
-
-  const signInWithWallet = async () => {
-    if (!MiniKit.isInstalled()) {
-      alert('Por favor abre esta página desde World App');
+  const fetchActivas = async () => {
+    if (!walletConnected) {
+      alert("Por favor, conecta tu billetera.");
       return;
     }
 
     try {
-      const res = await fetch(`/api/nonce`);
-      const { nonce } = await res.json();
+      const contract = await getLotteryContract();
+      const result = await contract.verLoteriasActivas();
 
-      const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
-        nonce: nonce,
-        requestId: '0',
-        expirationTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
-        notBefore: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
-        statement: 'Autenticación en Dream Lottery',
-      });
-
-      if (finalPayload.status === 'error') {
-        console.error("Error en Wallet Auth");
-        return;
-      }
-
-      const response = await fetch('/api/complete-siwe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload: finalPayload, nonce }),
-      });
-
-      const data = await response.json();
-
-      if (data.status === 'success' && data.isValid) {
-        setIsLoggedIn(true);
-        setWalletAddress(MiniKit.walletAddress);
-        setUsername(MiniKit.user?.username ?? null);
-      } else {
-        console.error("Error al validar SIWE");
-      }
+      const parsed = result.reduce((acc: any, l: any) => {
+        acc[l.nombre.toLowerCase()] = {
+          vendidos: Number(l.boletosVendidos),
+          total: Number(l.totalBoletos),
+        };
+        return acc;
+      }, {});
+      setLoteriasActivas(parsed);
     } catch (error) {
-      console.error("Error en Wallet Auth:", error);
+      console.error("Error al obtener boletos vendidos:", error);
     }
+  };
+
+  useEffect(() => {
+    fetchActivas(); // Llamar a fetchActivas cuando se cargue la página
+  }, [walletConnected]); // Solo vuelve a cargar si walletConnected cambia
+
+  // Función para conectar la billetera
+  const handleConnectWallet = async () => {
+    await connectWallet(); // Intenta conectar la billetera de Worldcoin
+    setWalletConnected(true); // Cambia el estado a 'conectado'
   };
 
   return (
@@ -142,30 +107,24 @@ export default function Home() {
 
       <Idiomas />
 
-      {/* Botón de Conectar Wallet */}
-      <div className="absolute top-4 right-6 z-20">
-        {!isLoggedIn ? (
-          <button
-            onClick={signInWithWallet}
-            className="bg-white text-black font-bold py-2 px-4 rounded-full shadow-md hover:bg-gray-300 transition"
-          >
-            Conectar billetera
-          </button>
-        ) : (
-          <div className="bg-white text-black font-bold py-2 px-4 rounded-full shadow-md">
-            {username ? `👋 ${username}` : `👛 ${walletAddress?.slice(0, 6)}...${walletAddress?.slice(-4)}`}
-          </div>
-        )}
-      </div>
-
       {/* Imagen título centrada */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
         <img
-          src="/images/main_title.png"
+          src="/images/main_title.png" // 👈 asegúrate de que la ruta y el nombre del archivo estén correctos
           alt="Título de la Lotería"
           className="w-96 h-40"
         />
       </div>
+
+      {/* Botón para conectar billetera */}
+      {!walletConnected && (
+        <button
+          onClick={handleConnectWallet}
+          className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-6 py-3 rounded-full font-semibold shadow-md hover:bg-blue-400 transition"
+        >
+          Conectar Billetera
+        </button>
+      )}
 
       <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
         <div ref={scrollRef} className="flex gap-5 overflow-x-auto scroll-smooth w-full px-10 no-scrollbar snap-x snap-mandatory">
