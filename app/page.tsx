@@ -22,16 +22,16 @@ export default function Home() {
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
 
+  // Hook useEffect para redirigir si no está autenticado
   useEffect(() => {
-    if (!loading) { // Espera a que termine de cargar
-      if (!isAuthenticated) {
-        router.push("/login");
-      }
+    if (!loading && !isAuthenticated) {
+      router.push("/login");
     }
   }, [loading, isAuthenticated, router]);
 
+  // Si está cargando, mostrar el mensaje de carga
   if (loading) {
-    return <div>Cargando...</div>; // o un spinner bonito si quieres
+    return <div>Cargando...</div>; // o un spinner bonito si prefieres
   }
 
   const lotteries = [
@@ -41,7 +41,8 @@ export default function Home() {
     { key: "saphire", link: "/lottery/saphire", price: "5 WLD", mainBg: "mythic.jpg", button: "bg-[#d5f0ff]", border: "border-[#3554f7]", color: "text-[#3554f7]", bgColor: "bg-white/70", prize: "400 WLD" },
     { key: "diamond", link: "/lottery/diamond", price: "10 WLD", mainBg: "divine.jpg", button: "bg-[#fff5fb]", border: "border-[#4b002a]", color: "text-[#4b002a]", bgColor: "bg-white/70", prize: "800 WLD" },
   ];
-  
+
+  // Cambiar imagen de fondo cada vez que se actualice el índice
   useEffect(() => {
     setFade(true);
     setTimeout(() => {
@@ -75,6 +76,7 @@ export default function Home() {
     preventScrollOnSwipe: true,
   });
 
+  // Obtener información de las loterías activas
   useEffect(() => {
     const fetchActivas = async () => {
       try {
