@@ -7,7 +7,9 @@ import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
-import { getLotteryContract, connectWallet } from "@/app/utils/ethersHelpers"; // 👈 Importante
+import { getLotteryContract } from "@/app/utils/ethersHelpers";
+import { MiniKit } from "@worldcoin/minikit-js"; // 👈 Importante
+import { useRouter } from "next/navigation"; // Opcional, por si quieres redirigir después de login
 
 export default function Home() {
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
@@ -17,7 +19,8 @@ export default function Home() {
   const [fade, setFade] = useState(false);
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
-  const [walletConnected, setWalletConnected] = useState(false); // Estado para verificar si la billetera está conectada
+  const [isAuthenticating, setIsAuthenticating] = useState(true); // 👈 Estado de carga durante auth
+  const router = useRouter();
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
@@ -26,6 +29,55 @@ export default function Home() {
     { key: "saphire", link: "/lottery/saphire", price: "5 WLD", mainBg: "mythic.jpg", button: "bg-[#d5f0ff]", border: "border-[#3554f7]", color: "text-[#3554f7]", bgColor: "bg-white/70", prize: "400 WLD" },
     { key: "diamond", link: "/lottery/diamond", price: "10 WLD", mainBg: "divine.jpg", button: "bg-[#fff5fb]", border: "border-[#4b002a]", color: "text-[#4b002a]", bgColor: "bg-white/70", prize: "800 WLD" },
   ];
+
+  useEffect(() => {
+    const authenticate = async () => {
+      if (!MiniKit.isInstalled()) {
+        console.error("Worldcoin MiniKit not installed");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/nonce`);
+        const { nonce } = await res.json();
+
+        const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
+          nonce: nonce,
+          requestId: '0',
+          expirationTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
+          notBefore: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
+          statement: 'Sign in to Dream Lottery',
+        });
+
+        if (finalPayload.status === 'error') {
+          console.error("WalletAuth failed");
+          return;
+        }
+
+        const response = await fetch('/api/complete-siwe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payload: finalPayload, nonce }),
+        });
+
+        const result = await response.json();
+
+        if (result.status !== 'success' || !result.isValid) {
+          console.error("SIWE verification failed");
+          return;
+        }
+
+        console.log("User authenticated:", MiniKit.walletAddress);
+        // Opcional: puedes guardar el wallet en tu estado global o cookies aquí
+      } catch (error) {
+        console.error("Error during wallet authentication:", error);
+      } finally {
+        setIsAuthenticating(false); // 👈 Ya terminó la auth
+      }
+    };
+
+    authenticate();
+  }, []);
 
   useEffect(() => {
     setFade(true);
@@ -60,38 +112,35 @@ export default function Home() {
     preventScrollOnSwipe: true,
   });
 
-  const fetchActivas = async () => {
-    if (!walletConnected) {
-      alert("Por favor, conecta tu billetera.");
-      return;
-    }
-
-    try {
-      const contract = await getLotteryContract();
-      const result = await contract.verLoteriasActivas();
-
-      const parsed = result.reduce((acc: any, l: any) => {
-        acc[l.nombre.toLowerCase()] = {
-          vendidos: Number(l.boletosVendidos),
-          total: Number(l.totalBoletos),
-        };
-        return acc;
-      }, {});
-      setLoteriasActivas(parsed);
-    } catch (error) {
-      console.error("Error al obtener boletos vendidos:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchActivas(); // Llamar a fetchActivas cuando se cargue la página
-  }, [walletConnected]); // Solo vuelve a cargar si walletConnected cambia
+    const fetchActivas = async () => {
+      try {
+        const contract = await getLotteryContract();
+        const result = await contract.verLoteriasActivas();
 
-  // Función para conectar la billetera
-  const handleConnectWallet = async () => {
-    await connectWallet(); // Intenta conectar la billetera de Worldcoin
-    setWalletConnected(true); // Cambia el estado a 'conectado'
-  };
+        const parsed = result.reduce((acc: any, l: any) => {
+          acc[l.nombre.toLowerCase()] = {
+            vendidos: Number(l.boletosVendidos),
+            total: Number(l.totalBoletos),
+          };
+          return acc;
+        }, {});
+        setLoteriasActivas(parsed);
+      } catch (error) {
+        console.error("Error al obtener boletos vendidos:", error);
+      }
+    };
+
+    fetchActivas();
+  }, []);
+
+  if (isAuthenticating) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black text-white text-2xl">
+        Iniciando sesión...
+      </div>
+    );
+  }
 
   return (
     <main {...handlers} className="min-h-screen relative flex items-center justify-center overflow-hidden">
@@ -110,21 +159,11 @@ export default function Home() {
       {/* Imagen título centrada */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
         <img
-          src="/images/main_title.png" // 👈 asegúrate de que la ruta y el nombre del archivo estén correctos
+          src="/images/main_title.png"
           alt="Título de la Lotería"
           className="w-96 h-40"
         />
       </div>
-
-      {/* Botón para conectar billetera */}
-        {!walletConnected && (
-          <button
-            onClick={handleConnectWallet}
-            className="absolute top-20 left-5 bg-blue-500 text-white px-6 py-3 rounded-full font-semibold shadow-md hover:bg-blue-400 transition"
-          >
-            Conectar Billetera
-          </button>
-        )}
 
       <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
         <div ref={scrollRef} className="flex gap-5 overflow-x-auto scroll-smooth w-full px-10 no-scrollbar snap-x snap-mandatory">
@@ -149,7 +188,7 @@ export default function Home() {
                     {messages[language].enter_draw}
                   </button>
                 </Link>
-                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>            
+                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>
               </motion.div>
             );
           })}
