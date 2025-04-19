@@ -1,15 +1,20 @@
 "use client";
 
 import { useContext, useRef, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useWalletAuth } from "@/components/wallet/WalletAuthContext";
 import Idiomas from "@/components/Idiomas";
 import { messages } from "@/data/translations";
 import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
-import { getLotteryContract } from "@/app/utils/ethersHelpers"; // 👈 Importante
+import { getLotteryContract } from "@/app/utils/ethersHelpers";
+import Image from "next/image"; // Usamos el componente Image de Next.js
 
 export default function Home() {
+  const { isAuthenticated, loading } = useWalletAuth();
+  const router = useRouter();
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,6 +23,36 @@ export default function Home() {
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
 
+  // `useEffect` para redirigir a login si no está autenticado
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [loading, isAuthenticated, router]);
+
+  // Cargar los detalles de las loterías activas
+  useEffect(() => {
+    const fetchActivas = async () => {
+      try {
+        const contract = await getLotteryContract();
+        const result = await contract.verLoteriasActivas();
+
+        const parsed = result.reduce((acc: any, l: any) => {
+          acc[l.nombre.toLowerCase()] = {
+            vendidos: Number(l.boletosVendidos),
+            total: Number(l.totalBoletos),
+          };
+          return acc;
+        }, {});
+        setLoteriasActivas(parsed);
+      } catch (error) {
+        console.error("Error al obtener boletos vendidos:", error);
+      }
+    };
+
+    fetchActivas();
+  }, []); // Se ejecuta una vez cuando el componente se monta
+
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
     { key: "citrine", link: "/lottery/citrine", price: "1 WLD", mainBg: "epic.jpg", button: "bg-[#ffefbd]", border: "border-[#ff6c01]", color: "text-[#ff6c01]", bgColor: "bg-white/70", prize: "80 WLD" },
@@ -25,7 +60,7 @@ export default function Home() {
     { key: "saphire", link: "/lottery/saphire", price: "5 WLD", mainBg: "mythic.jpg", button: "bg-[#d5f0ff]", border: "border-[#3554f7]", color: "text-[#3554f7]", bgColor: "bg-white/70", prize: "400 WLD" },
     { key: "diamond", link: "/lottery/diamond", price: "10 WLD", mainBg: "divine.jpg", button: "bg-[#fff5fb]", border: "border-[#4b002a]", color: "text-[#4b002a]", bgColor: "bg-white/70", prize: "800 WLD" },
   ];
-  
+
   useEffect(() => {
     setFade(true);
     setTimeout(() => {
@@ -59,28 +94,6 @@ export default function Home() {
     preventScrollOnSwipe: true,
   });
 
-  useEffect(() => {
-    const fetchActivas = async () => {
-      try {
-        const contract = await getLotteryContract();
-        const result = await contract.verLoteriasActivas();
-
-        const parsed = result.reduce((acc: any, l: any) => {
-          acc[l.nombre.toLowerCase()] = {
-            vendidos: Number(l.boletosVendidos),
-            total: Number(l.totalBoletos),
-          };
-          return acc;
-        }, {});
-        setLoteriasActivas(parsed);
-      } catch (error) {
-        console.error("Error al obtener boletos vendidos:", error);
-      }
-    };
-
-    fetchActivas();
-  }, []);
-
   return (
     <main {...handlers} className="min-h-screen relative flex items-center justify-center overflow-hidden">
       <div
@@ -97,10 +110,11 @@ export default function Home() {
 
       {/* Imagen título centrada */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
-        <img
-          src="/images/main_title.png" // 👈 asegúrate de que la ruta y el nombre del archivo estén correctos
+        <Image
+          src="/images/main_title.png" // Asegúrate de que la ruta y el nombre del archivo estén correctos
           alt="Título de la Lotería"
-          className="w-96 h-40"
+          width={384}  // Ajusta el tamaño de la imagen
+          height={160} // Ajusta el tamaño de la imagen
         />
       </div>
 
