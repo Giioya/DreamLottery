@@ -15,8 +15,8 @@ const lotteryTypes = {
         selectColor: "bg-green-400",
         boColor: "border-green-600",
         textColor: "text-green-600",
-        price: "0.00005",
-        prize: "0.004 ETH",
+        price: "0.5 WLD",
+        prize: "40 WLD",
         bgColor: "bg-green-200",
         backgroundImage: "/images/bg_quarzt.jpg",
         titleImage: "/images/title_quartz.png",
@@ -27,8 +27,8 @@ const lotteryTypes = {
         selectColor: "bg-[#ff6c01]",
         boColor: "border-[#ff6c01]",
         textColor: "text-black",
-        price: "0.0001",
-        prize: "0.008 ETH",
+        price: "1 WLD",
+        prize: "80 WLD",
         bgColor: "bg-yellow-200",
         backgroundImage: "/images/bg_citrine.jpg",
         titleImage: "/images/title_citrine.png",
@@ -39,8 +39,8 @@ const lotteryTypes = {
         selectColor: "bg-[#903eca]",
         boColor: "border-[#903eca]",
         textColor: "text-purple-600",
-        price: "0.0003",
-        prize: "0.024 ETH",
+        price: "3 WLD",
+        prize: "240 WLD",
         bgColor: "bg-purple-200",
         backgroundImage: "/images/bg_amethyst.png",
         titleImage: "/images/title_amethyst.png",
@@ -51,8 +51,8 @@ const lotteryTypes = {
         selectColor: "bg-[#3554f7]",
         boColor: "border-[#3554f7]",
         textColor: "text-blue-600",
-        price: "0.0005",
-        prize: "0.04 ETH",
+        price: "5 WLD",
+        prize: "400 WLD",
         bgColor: "bg-blue-200",
         backgroundImage: "/images/bg_sapphire.png",
         titleImage: "/images/title_sapphire.png",
@@ -63,8 +63,8 @@ const lotteryTypes = {
         selectColor: "bg-[#4b002a]",
         boColor: "border-[#4b002a]",
         textColor: "text-black drop-shadow-[0_0_5px_white]",
-        price: "0.001",
-        prize: "0.08 ETH",
+        price: "10 WLD",
+        prize: "800 WLD",
         bgColor: "bg-gray-200",
         backgroundImage: "/images/bg_diamond.png",
         titleImage: "/images/title_diamond.png",
@@ -250,7 +250,7 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
             {/* Contenido principal scrollable */}
             <div className="relative z-10 w-full h-full overflow-y-auto pt-40 mt-40 px-6 pb-24">
                 <div
-                    className={`grid grid-cols-5 gap-2 p-4 ${lottery.boColor} ${lottery.color} shadow-md rounded-xl border-4 h-[300px] overflow-y-scroll`}
+                    className={`grid grid-cols-5 gap-2 p-4 ${lottery.boColor} ${lottery.color} shadow-md rounded-xl border-4 h-[calc(100vh-200px)] overflow-auto`} // Ajusta el alto para permitir el scroll
                 >
                     {numbers.map((num) => {
                         const isPurchased = purchasedNumbers.includes(num);
@@ -261,13 +261,11 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
                                 disabled={isPurchased}
                                 onClick={() => toggleNumberSelection(num)}
                                 className={`w-12 h-12 flex items-center justify-center border rounded-xl text-lg font-bold
-                                ${
-                                    isPurchased
-                                        ? lottery.boColor
-                                        : isSelected
-                                        ? lottery.selectColor
-                                        : "bg-white"
-                                }
+                                ${isPurchased
+                                    ? lottery.boColor
+                                    : isSelected
+                                    ? lottery.selectColor
+                                    : "bg-white"}
                                 ${isPurchased ? "opacity-10 cursor-not-allowed" : ""}`}
                             >
                                 {num.toString().padStart(2, "0")}
