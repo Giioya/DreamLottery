@@ -7,7 +7,8 @@ import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
-import { getLotteryContract } from "@/app/utils/ethersHelpers"; // 👈 Importante
+import { getLotteryContract } from "@/app/utils/ethersHelpers";
+import { JsonRpcProvider } from "ethers"; // 👈 Importar desde ethers v6
 
 export default function Home() {
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
@@ -18,9 +19,9 @@ export default function Home() {
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
 
-  // 👇 Agregamos username y walletAddress
   const [username, setUsername] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [saldo, setSaldo] = useState<string | null>(null); // 👈 para el saldo
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
@@ -83,6 +84,29 @@ export default function Home() {
     };
 
     fetchActivas();
+  }, []);
+
+  useEffect(() => {
+    const cargarDatosUsuario = async () => {
+      try {
+        const storedUsername = localStorage.getItem("username");
+        const storedAddress = localStorage.getItem("walletAddress");
+
+        if (storedUsername) setUsername(storedUsername);
+        if (storedAddress) setWalletAddress(storedAddress);
+
+        if (storedAddress) {
+          const provider = new JsonRpcProvider("https://rpc.worldchain.dev"); // tu RPC
+          const balance = await provider.getBalance(storedAddress);
+          const balanceInWLD = Number(balance) / 1e18; // convertir BigInt a número flotante
+          setSaldo(balanceInWLD.toFixed(3)); // redondeamos a 3 decimales
+        }
+      } catch (error) {
+        console.error("Error al cargar datos de usuario:", error);
+      }
+    };
+
+    cargarDatosUsuario();
   }, []);
 
   return (
@@ -153,7 +177,7 @@ export default function Home() {
           className="mb-2 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-full shadow-md transition"
           onClick={() => {
             localStorage.clear();
-            window.location.reload(); // recarga la página después de borrar
+            window.location.reload();
           }}
         >
           Borrar Datos
@@ -165,6 +189,11 @@ export default function Home() {
               ? `Bienvenido, ${walletAddress.slice(0, 6)}...`
               : "Bienvenido"}
         </div>
+        {walletAddress && saldo && (
+          <div className="text-xs mt-1">
+            Saldo: {saldo} WLD
+          </div>
+        )}
       </div>
     </main>
   );
