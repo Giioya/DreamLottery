@@ -13,7 +13,7 @@ import { getLotteryContract } from "@/app/utils/ethersHelpers";
 import Image from "next/image"; // Usamos el componente Image de Next.js
 
 export default function Home() {
-  const { isAuthenticated, loading } = useWalletAuth();
+  const { isAuthenticated, walletAddress, loading } = useWalletAuth();  // Ahora obtenemos walletAddress
   const router = useRouter();
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -22,13 +22,21 @@ export default function Home() {
   const [fade, setFade] = useState(false);
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
+  const [saldoDisponible, setSaldoDisponible] = useState<string | null>(null);  // Estado para el saldo de la billetera
 
   // `useEffect` para redirigir a login si no está autenticado
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/login");
+    } else {
+      // Si está autenticado, puedes obtener el saldo disponible de la billetera
+      if (walletAddress) {
+        getBalance(walletAddress).then((saldo) => {
+          setSaldoDisponible(saldo); // Maneja el saldo en el estado
+        });
+      }
     }
-  }, [loading, isAuthenticated, router]);
+  }, [loading, isAuthenticated, walletAddress, router]);
 
   // Cargar los detalles de las loterías activas
   useEffect(() => {
@@ -43,7 +51,7 @@ export default function Home() {
             total: Number(l.totalBoletos),
           };
           return acc;
-        }, {});
+        }, {});        
         setLoteriasActivas(parsed);
       } catch (error) {
         console.error("Error al obtener boletos vendidos:", error);
@@ -105,16 +113,15 @@ export default function Home() {
           backgroundAttachment: "fixed",
         }}
       />
-
       <Idiomas />
 
       {/* Imagen título centrada */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
         <Image
-          src="/images/main_title.png" // Asegúrate de que la ruta y el nombre del archivo estén correctos
+          src="/images/main_title.png"
           alt="Título de la Lotería"
-          width={384}  // Ajusta el tamaño de la imagen
-          height={160} // Ajusta el tamaño de la imagen
+          width={384}
+          height={160}
         />
       </div>
 
@@ -141,12 +148,26 @@ export default function Home() {
                     {messages[language].enter_draw}
                   </button>
                 </Link>
-                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>            
+                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>
               </motion.div>
             );
           })}
         </div>
       </div>
+
+      {/* Mostrar información de billetera si está autenticado */}
+      {isAuthenticated && walletAddress && (
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 text-white">
+          <p>Billetera conectada: {walletAddress}</p>
+          {saldoDisponible !== null && <p>Saldo disponible: {saldoDisponible} WLD</p>}
+        </div>
+      )}
     </main>
   );
+}
+
+async function getBalance(walletAddress: string) {
+  const contract = await getLotteryContract();
+  const balance = await contract.balanceOf(walletAddress);
+  return balance.toString(); // Convierte el saldo a cadena
 }

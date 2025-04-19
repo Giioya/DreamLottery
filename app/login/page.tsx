@@ -2,18 +2,30 @@
 
 import { useRouter } from "next/navigation";
 import { useWalletAuth } from "@/components/wallet/WalletAuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
     const { isAuthenticated, signInWithWallet } = useWalletAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [isClient, setIsClient] = useState(false);  // Para asegurarnos de que estamos en el cliente
+
+    // Comprobar si estamos en el cliente
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    // Si el usuario ya está autenticado, redirigir directamente
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.push('/');
+        }
+    }, [isAuthenticated, router]);
 
     const handleLogin = async () => {
         setLoading(true);
         try {
             await signInWithWallet();
-            // Redirigir manualmente después de iniciar sesión
             router.push('/');
         } catch (error) {
             console.error('Error al iniciar sesión', error);
@@ -22,10 +34,8 @@ export default function LoginPage() {
         }
     };
 
-    // Si ya está autenticado, redirigir directamente (opcional)
-    if (isAuthenticated) {
-        router.push('/');
-    }
+    // Si no estamos en el cliente, no renderizamos nada
+    if (!isClient) return null;
 
     return (
         <main className="min-h-screen flex flex-col items-center justify-center bg-white space-y-4">
