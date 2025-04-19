@@ -256,14 +256,14 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
         <div
             className={`grid grid-cols-5 gap-2 p-4 ${lottery.boColor} ${lottery.color} shadow-md rounded-xl border-4 h-[300px] overflow-y-scroll`}
         >
-            {numbers.map((num) => {
-                const isPurchased = purchasedNumbers.includes(num);
-                const isSelected = selectedNumbers.includes(num);
+            {numbers.map((number) => {
+                const isPurchased = purchasedNumbers.includes(number);
+                const isSelected = selectedNumbers.includes(number);
                 return (
                 <button
-                    key={num}
+                    key={number}
                     disabled={isPurchased}
-                    onClick={() => toggleNumberSelection(num)}
+                    onClick={() => toggleNumberSelection(number)}
                     className={`w-12 h-12 flex items-center justify-center border rounded-xl text-lg font-bold
                     ${
                         isPurchased
@@ -274,7 +274,7 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
                     }
                     ${isPurchased ? "opacity-10 cursor-not-allowed" : ""}`}
                 >
-                    {num.toString().padStart(2, "0")}
+                    {number}
                 </button>
                 );
             })}
