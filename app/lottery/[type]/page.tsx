@@ -15,7 +15,7 @@ const lotteryTypes = {
         selectColor: "bg-green-400",
         boColor: "border-green-600",
         textColor: "text-green-600",
-        price: "0.5 WLD",
+        price: "0,5 WLD",
         prize: "40 WLD",
         bgColor: "bg-green-200",
         backgroundImage: "/images/bg_quarzt.jpg",
@@ -151,7 +151,7 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
             const totalCost = priceInWei * BigInt(selectedNumbers.length);
 
             const tx = await contract.comprarBoletos(lotteryId, selectedNumbers, {
-                value: totalCost.toString(16), // Aquí se hizo el cambio de toHexString() a toString(16)
+                value: totalCost,
             });
             await tx.wait();
 
@@ -248,7 +248,7 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
             </div>
 
             {/* Contenido principal scrollable */}
-            <div className="relative z-10 w-full h-full overflow-y-auto pt-40 mt-40 px-6 pb-24">
+            <div className="relative z-10 w-full h-full overflow-y-auto pt-40 mt-40 px-6">
                 <div
                     className={`grid grid-cols-5 gap-2 p-4 ${lottery.boColor} ${lottery.color} shadow-md rounded-xl border-4 h-[300px] overflow-y-scroll`}
                 >
@@ -261,14 +261,15 @@ export default function LotteryPage({ params }: { params: { type: string } }) {
                                 disabled={isPurchased}
                                 onClick={() => toggleNumberSelection(num)}
                                 className={`w-12 h-12 flex items-center justify-center border rounded-xl text-lg font-bold
-                                ${
-                                    isPurchased
-                                        ? lottery.boColor
-                                        : isSelected
-                                        ? lottery.selectColor
-                                        : "bg-white"
-                                }
-                                ${isPurchased ? "opacity-10 cursor-not-allowed" : ""}`}
+                                    ${
+                                        isPurchased
+                                            ? lottery.boColor
+                                            : isSelected
+                                            ? lottery.selectColor
+                                            : "bg-white"
+                                    }
+                                    ${isPurchased ? "opacity-10 cursor-not-allowed" : ""}
+                                `}
                             >
                                 {num.toString().padStart(2, "0")}
                             </button>
