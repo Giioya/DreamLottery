@@ -8,7 +8,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import { getLotteryContract } from "@/app/utils/ethersHelpers";
-import { JsonRpcProvider } from "ethers"; // 👈 Importar desde ethers v6
+import { JsonRpcProvider } from "ethers";
+import { getBalance } from "@/components/balance"; // Importa la función de obtener el saldo
 
 export default function Home() {
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
@@ -21,7 +22,7 @@ export default function Home() {
 
   const [username, setUsername] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [saldo, setSaldo] = useState<string | null>(null); // 👈 para el saldo
+  const [saldo, setSaldo] = useState<string | null>(null);
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
@@ -96,10 +97,8 @@ export default function Home() {
         if (storedAddress) setWalletAddress(storedAddress);
 
         if (storedAddress) {
-          const provider = new JsonRpcProvider("https://rpc.worldchain.dev"); // tu RPC
-          const balance = await provider.getBalance(storedAddress);
-          const balanceInWLD = Number(balance) / 1e18; // convertir BigInt a número flotante
-          setSaldo(balanceInWLD.toFixed(3)); // redondeamos a 3 decimales
+          const balance = await getBalance(storedAddress); // Usar la función getBalance
+          setSaldo(balance.toFixed(3)); // Mostrar el saldo con 3 decimales
         }
       } catch (error) {
         console.error("Error al cargar datos de usuario:", error);
@@ -171,7 +170,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Contenedor del Bienvenido */}
+      {/* Contenedor del Bienvenido + Saldo */}
       <div className="absolute bottom-20 right-5 bg-black/50 text-white px-4 py-2 rounded-xl shadow-lg backdrop-blur-md z-20 flex flex-col items-center">
         <button
           className="mb-2 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-full shadow-md transition"
@@ -182,18 +181,20 @@ export default function Home() {
         >
           Borrar Datos
         </button>
-        <div className="text-center text-lg font-bold">
-          {username
-            ? `Bienvenido, ${username}`
-            : walletAddress
+        <div className="text-center">
+          <div className="text-lg font-bold">
+            {username
+              ? `Bienvenido, ${username}`
+              : walletAddress
               ? `Bienvenido, ${walletAddress.slice(0, 6)}...`
               : "Bienvenido"}
-        </div>
-        {walletAddress && saldo && (
-          <div className="text-xs mt-1">
-            Saldo: {saldo} WLD
           </div>
-        )}
+          {walletAddress && saldo && (
+            <div className="text-lg mt-1 font-semibold">
+              Saldo: {saldo} WLD
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );

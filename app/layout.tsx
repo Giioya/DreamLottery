@@ -18,7 +18,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen flex flex-col`}>
-      <AuthGuard> {/* 🔒 Protege toda la app */}
         <NextAuthProvider>
           <ErudaProviderClient>
             <MiniKitProvider>
@@ -28,7 +27,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </MiniKitProvider>
           </ErudaProviderClient>
         </NextAuthProvider>
-      </AuthGuard>
       </body>
     </html>
   );
