@@ -10,12 +10,17 @@ export default function LoginPage() {
 
     useEffect(() => {
         const tryLogin = async () => {
-        const isWorldApp = window?.navigator?.userAgent.includes('WorldApp');
-        if (isWorldApp && !isAuthenticated) {
-            await signInWithWallet();
-        }
-        // Redirigir al home (o a donde quieras) después de intentar loguear
-        router.push('/');
+            const isWorldApp = window?.navigator?.userAgent.includes('WorldApp');
+            
+            // Si el usuario no está autenticado y está en WorldApp, intentamos iniciar sesión
+            if (isWorldApp && !isAuthenticated) {
+                await signInWithWallet();
+            }
+            
+            // Solo redirigir después de asegurarnos que el usuario esté autenticado
+            if (isAuthenticated) {
+                router.push('/');  // Redirige a la página principal después de iniciar sesión
+            }
         };
 
         tryLogin();
@@ -23,7 +28,7 @@ export default function LoginPage() {
 
     return (
         <main className="min-h-screen flex items-center justify-center bg-white">
-        <h1 className="text-xl font-bold">Conectando tu Wallet...</h1>
+            <h1 className="text-xl font-bold">Conectando tu Wallet...</h1>
         </main>
     );
-    }
+}

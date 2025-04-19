@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useContext, useRef, useState, useEffect } from "react";
 import Idiomas from "@/components/Idiomas";
@@ -8,19 +8,19 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import { getLotteryContract } from "@/app/utils/ethersHelpers";
-import { useWalletAuth } from "@/components/wallet/WalletAuthContext"; // 👈 Importante
-import { useRouter } from "next/navigation"; // 👈 Para la redirección
+import { useWalletAuth } from "@/components/wallet/WalletAuthContext";
+import { useRouter } from "next/navigation"; // Importamos useRouter
 
 export default function Home() {
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
-  const { isAuthenticated, walletAddress, username, signInWithWallet } = useWalletAuth(); // 👈 Nuevo
-  const router = useRouter(); // 👈 Para redirigir al login
+  const { isAuthenticated, walletAddress, username, signInWithWallet } = useWalletAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [bgImage, setBgImage] = useState(`/images/rare.jpg`);
   const [fade, setFade] = useState(false);
   const isScrolling = useRef(false);
   const [loteriasActivas, setLoteriasActivas] = useState<Record<string, { vendidos: number; total: number }>>({});
+  const router = useRouter(); // Inicializamos el enrutador
 
   const lotteries = [
     { key: "quartz", link: "/lottery/quartz", price: "0.5 WLD", mainBg: "bg_main_quartz.jpg", button: "bg-[#f3ffca]", border: "border-green-600", color: "text-green-600", bgColor: "bg-white/70", prize: "40 WLD" },
@@ -29,7 +29,7 @@ export default function Home() {
     { key: "saphire", link: "/lottery/saphire", price: "5 WLD", mainBg: "mythic.jpg", button: "bg-[#d5f0ff]", border: "border-[#3554f7]", color: "text-[#3554f7]", bgColor: "bg-white/70", prize: "400 WLD" },
     { key: "diamond", link: "/lottery/diamond", price: "10 WLD", mainBg: "divine.jpg", button: "bg-[#fff5fb]", border: "border-[#4b002a]", color: "text-[#4b002a]", bgColor: "bg-white/70", prize: "800 WLD" },
   ];
-  
+
   useEffect(() => {
     setFade(true);
     setTimeout(() => {
@@ -75,7 +75,7 @@ export default function Home() {
             total: Number(l.totalBoletos),
           };
           return acc;
-        }, {}); // Esto nos da las loterías activas
+        }, {});
         setLoteriasActivas(parsed);
       } catch (error) {
         console.error("Error al obtener boletos vendidos:", error);
@@ -85,15 +85,16 @@ export default function Home() {
     fetchActivas();
   }, []);
 
+  // Redirección si no está autenticado
   useEffect(() => {
-    // Si el usuario no está autenticado, lo redirigimos al login
     if (!isAuthenticated) {
-      router.push("/login"); // Redirige a la página de login
+      router.push("/login"); // Redirigir a la página de login
     }
-  }, [isAuthenticated, router]); // Dependencia de isAuthenticated para controlar el estado de login
+  }, [isAuthenticated, router]); // Solo se ejecuta cuando cambia isAuthenticated
 
   return (
     <main {...handlers} className="min-h-screen relative flex items-center justify-center overflow-hidden">
+      {/* Fondo y contenido de la página */}
       <div
         className={`absolute inset-0 transition-opacity duration-500 ${fade ? "opacity-0" : "opacity-100"}`}
         style={{
@@ -103,7 +104,6 @@ export default function Home() {
           backgroundAttachment: "fixed",
         }}
       />
-
       <Idiomas />
 
       {/* Imagen título centrada */}
@@ -115,6 +115,7 @@ export default function Home() {
         />
       </div>
 
+      {/* Loterías activas */}
       <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
         <div ref={scrollRef} className="flex gap-5 overflow-x-auto scroll-smooth w-full px-10 no-scrollbar snap-x snap-mandatory">
           {lotteries.map((lottery, index) => {
@@ -138,7 +139,7 @@ export default function Home() {
                     {messages[language].enter_draw}
                   </button>
                 </Link>
-                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>
+                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>            
               </motion.div>
             );
           })}
