@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useContext, useRef, useState, useEffect } from "react";
 import Idiomas from "@/components/Idiomas";
@@ -9,10 +9,12 @@ import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import { getLotteryContract } from "@/app/utils/ethersHelpers";
 import { useWalletAuth } from "@/components/wallet/WalletAuthContext"; // 👈 Importante
+import { useRouter } from "next/navigation"; // 👈 Para la redirección
 
 export default function Home() {
   const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
   const { isAuthenticated, walletAddress, username, signInWithWallet } = useWalletAuth(); // 👈 Nuevo
+  const router = useRouter(); // 👈 Para redirigir al login
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [bgImage, setBgImage] = useState(`/images/rare.jpg`);
@@ -73,7 +75,7 @@ export default function Home() {
             total: Number(l.totalBoletos),
           };
           return acc;
-        }, {});
+        }, {}); // Esto nos da las loterías activas
         setLoteriasActivas(parsed);
       } catch (error) {
         console.error("Error al obtener boletos vendidos:", error);
@@ -84,12 +86,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const isWorldApp = typeof window !== 'undefined' && window.navigator.userAgent.includes('WorldApp/')
-    if (isWorldApp && !isAuthenticated) {
-      signInWithWallet();
+    // Si el usuario no está autenticado, lo redirigimos al login
+    if (!isAuthenticated) {
+      router.push("/login"); // Redirige a la página de login
     }
-  }, [isAuthenticated, signInWithWallet]);
-  
+  }, [isAuthenticated, router]); // Dependencia de isAuthenticated para controlar el estado de login
 
   return (
     <main {...handlers} className="min-h-screen relative flex items-center justify-center overflow-hidden">
@@ -137,7 +138,7 @@ export default function Home() {
                     {messages[language].enter_draw}
                   </button>
                 </Link>
-                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>            
+                <p className="text-black mt-3 font-bold">{vendidos}/{total} {messages[language].Purchased_tickets}</p>
               </motion.div>
             );
           })}
