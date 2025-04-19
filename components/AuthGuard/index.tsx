@@ -4,7 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import Image from "next/image";
-import carga from "@/public/images/carga_buenocambios.jpg"; // Ajusta la ruta según la ubicación real de la imagen
+import carga from "@/public/images/logoLottery.jpg"; // Ajusta la ruta según la ubicación real de la imagen
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
