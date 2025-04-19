@@ -98,7 +98,7 @@ export default function Home() {
 
         if (storedAddress) {
           const balance = await getBalance(storedAddress); // Usar la función getBalance
-          setSaldo(balance.toFixed(3)); // Mostrar el saldo con 3 decimales
+          setSaldo(balance.toFixed(2)); // Mostrar el saldo con 3 decimales
         }
       } catch (error) {
         console.error("Error al cargar datos de usuario:", error);

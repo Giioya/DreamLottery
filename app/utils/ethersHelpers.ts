@@ -78,3 +78,32 @@ export const connectWallet = async () => {
         console.error("No wallet detectada en el navegador");
     }
 };
+
+// Función de Send Transaction para interactuar con el contrato
+export const sendTransaction = async (transactionDetails: { contractAddress: string, functionName: string, args: any[], value?: string }) => {
+    if (!MiniKit.isInstalled()) {
+        console.error('MiniKit no está instalado.');
+        return;
+    }
+
+    // Crear la transacción
+    const transactionPayload = {
+        transaction: [
+            {
+                address: transactionDetails.contractAddress,
+                abi: LOTTERY_ABI,
+                functionName: transactionDetails.functionName,
+                value: transactionDetails.value ? transactionDetails.value : undefined,
+                args: transactionDetails.args,
+            },
+        ],
+    };
+
+    try {
+        const { commandPayload, finalPayload } = await MiniKit.commandsAsync.sendTransaction(transactionPayload);
+        console.log('Transaction Sent:', finalPayload);
+        return finalPayload;
+    } catch (error) {
+        console.error('Error al enviar la transacción:', error);
+    }
+};

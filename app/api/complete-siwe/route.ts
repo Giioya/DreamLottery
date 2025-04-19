@@ -37,5 +37,3 @@ interface IRequestPayload {
         });
     }
 }
-
-
