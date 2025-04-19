@@ -117,14 +117,14 @@ export default function Home() {
       </div>
 
       {/* Botón para conectar billetera */}
-      {!walletConnected && (
-        <button
-          onClick={handleConnectWallet}
-          className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-6 py-3 rounded-full font-semibold shadow-md hover:bg-blue-400 transition"
-        >
-          Conectar Billetera
-        </button>
-      )}
+        {!walletConnected && (
+          <button
+            onClick={handleConnectWallet}
+            className="absolute top-20 left-5 bg-blue-500 text-white px-6 py-3 rounded-full font-semibold shadow-md hover:bg-blue-400 transition"
+          >
+            Conectar Billetera
+          </button>
+        )}
 
       <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
         <div ref={scrollRef} className="flex gap-5 overflow-x-auto scroll-smooth w-full px-10 no-scrollbar snap-x snap-mandatory">
