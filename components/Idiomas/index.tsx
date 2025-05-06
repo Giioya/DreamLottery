@@ -41,7 +41,7 @@ export default function Idiomas() {
         <div className="fixed top-4 right-4 z-50">
             <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="px-4 py-2 text-black shadow-lg bg-gray-200 hover:bg-gray-500 flex items-center gap-2 rounded-2xl"
+                className="px-4 py-2 text-xs text-black shadow-lg bg-gray-200 hover:bg-gray-500 flex items-center gap-2 rounded-2xl"
             >
                 {/* 🌍 Bandera dinámica según idioma */}
                 <span className="text-lg">
