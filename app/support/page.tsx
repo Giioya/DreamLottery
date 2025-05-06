@@ -29,31 +29,31 @@ export default function SupportPage() {
                 <div className="flex flex-col gap-4 w-full items-center">
 
                     <Link
-                        href="https://t.me/+573204855274"
+                        href=""
                         target="_blank"
                         className="bg-sky-500 hover:bg-sky-600 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-3 text-center text-base transition w-52 mx-auto"
                     >
-                        <Send className="w-5 h-5" /> Telegram
+                        <Send className="w-5 h-5" /> Telegram coming soon
                     </Link>
 
                     <Link
-                        href="https://www.facebook.com/profile.php?id=61573392065683"
+                        href=""
                         target="_blank"
                         className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-3 text-center text-base transition w-52 mx-auto"
                     >
-                        <SiFacebook className="w-5 h-5" /> Facebook
+                        <SiFacebook className="w-5 h-5" /> Facebook coming soon
                     </Link>
 
                     <Link
-                        href="https://discord.gg/tu-enlace-aqui"
+                        href=""
                         target="_blank"
                         className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-3 text-center text-base transition w-52 mx-auto"
                     >
-                        <FaDiscord className="w-5 h-5" /> Discord
+                        <FaDiscord className="w-5 h-5" /> Discord coming soon
                     </Link>
 
                     <Link
-                        href="mailto:buenocambios@gmail.com"
+                        href="dreamlott3ry@gmail.com"
                         className="bg-gray-700 hover:bg-gray-800 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-3 text-center text-base transition w-52 mx-auto"
                     >
                         <Mail className="w-5 h-5" /> {messages[language].email}
