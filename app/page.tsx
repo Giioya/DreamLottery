@@ -239,7 +239,6 @@ export default function Home() {
         />
   
         {/* Selector de idioma */}
-        <Idiomas />
   
         {/* Imagen de título centrada */}
         <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10 w-full">
