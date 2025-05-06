@@ -37,7 +37,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
   return (
     <>
       {/* Selector de idioma en la esquina superior derecha */}
-      <div className="fixed top-4 right-4 z-50 scale-50">
+      <div className="fixed top-4 right-4 z-50 scale-75">
         <LanguageSelector />
       </div>
 
