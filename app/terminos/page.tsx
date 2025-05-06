@@ -51,7 +51,7 @@ export default function TerminosYPrivacidadPage() {
             {messages[language].info86}
             </p>
             <a
-            href="https://worldscan.org/address/0x918EC10e58DC41955328E07eee449b1455910cb8#tokentxns"
+            href="https://worldscan.org/address/0x00C2C39488Df0cd71c1980e22Fe8C341F3Aa83ff#tokentxns"
             className="text-blue-700 underline"
             target="_blank"
             >

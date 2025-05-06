@@ -53,7 +53,7 @@ export default function SupportPage() {
                     </Link>
 
                     <Link
-                        href="dreamlott3ry@gmail.com"
+                        href="mailto:dreamlott3ry@gmail.com"
                         className="bg-gray-700 hover:bg-gray-800 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-3 text-center text-base transition w-52 mx-auto"
                     >
                         <Mail className="w-5 h-5" /> {messages[language].email}

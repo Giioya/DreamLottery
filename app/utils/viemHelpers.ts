@@ -1,7 +1,7 @@
 import { publicClient } from '@/lib/viemClient';
 import { getContract, WalletClient } from 'viem';
 
-export const CONTRACT_ADDRESS = "0x918EC10e58DC41955328E07eee449b1455910cb8";
+export const CONTRACT_ADDRESS = "0x00C2C39488Df0cd71c1980e22Fe8C341F3Aa83ff";
 export const WLD_ADDRESS = "0x2cfc85d8e48f8eab294be644d9e25c3030863003";
 
 export const LOTTERY_ABI = [
