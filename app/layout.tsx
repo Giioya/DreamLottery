@@ -3,14 +3,13 @@
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import MiniKitProvider from "@/components/minikit-provider";
-import NextAuthProvider from "@/components/next-auth-provider";
 import ErudaProviderClient from "@/components/Eruda/ErudaProviderClient";
 import Link from "next/link";
 import LanguageSelector from "@/components/Idiomas";
 import { messages } from "@/data/translations";
 import LanguageProvider, { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import { ReactNode, useContext } from "react";
-import AuthGuard from "@/components/AuthGuard"; 
+import { WalletProvider } from "@/context/WalletAuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen flex flex-col`}>
-        <NextAuthProvider>
+      <WalletProvider>
           <ErudaProviderClient>
             <MiniKitProvider>
               <LanguageProvider>
@@ -26,7 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </LanguageProvider>
             </MiniKitProvider>
           </ErudaProviderClient>
-        </NextAuthProvider>
+          </WalletProvider>
       </body>
     </html>
   );

@@ -20,10 +20,10 @@ export default function FAQPage() {
                 <h2 className="text-xl font-bold text-black text-left">{messages[language].title16}</h2>
 
                 <div className="p-4 rounded-xl text-left text-black text-base leading-relaxed space-y-2">
-                    <p>✅ {messages[language].info60}</p>
-                    <p>✅ {messages[language].info61}</p>
-                    <p>✅ {messages[language].info62}</p>
-                    <p>✅ {messages[language].info63}</p>
+                    <p>{messages[language].info60}</p>
+                    <p>{messages[language].info61}</p>
+                    <p>{messages[language].info62}</p>
+                    <p>{messages[language].info63}</p>
                 </div>
 
                 <p className="text-gray-700 text-lg text-justify leading-relaxed">

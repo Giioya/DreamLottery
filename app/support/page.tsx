@@ -2,15 +2,18 @@
 
 import { Mail, MessageCircle, Send } from "lucide-react";
 import { SiFacebook } from 'react-icons/si';
+import { FaDiscord } from 'react-icons/fa'; // ← Agregado para ícono de Discord
 import Link from "next/link";
 import { messages } from "@/data/translations";
 import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import { useContext } from "react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function SupportPage() {
     const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
 
     return (
+        <ProtectedRoute>
         <main
             className="min-h-screen bg-fixed bg-cover bg-center flex items-center justify-center"
             style={{
@@ -24,13 +27,6 @@ export default function SupportPage() {
                 </p>
 
                 <div className="flex flex-col gap-4 w-full items-center">
-                    <Link
-                        href="https://wa.me/+573018208040"
-                        target="_blank"
-                        className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-3 text-center text-base transition w-52 mx-auto"
-                    >
-                        <MessageCircle className="w-5 h-5" /> WhatsApp
-                    </Link>
 
                     <Link
                         href="https://t.me/+573204855274"
@@ -49,6 +45,14 @@ export default function SupportPage() {
                     </Link>
 
                     <Link
+                        href="https://discord.gg/tu-enlace-aqui"
+                        target="_blank"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-3 text-center text-base transition w-52 mx-auto"
+                    >
+                        <FaDiscord className="w-5 h-5" /> Discord
+                    </Link>
+
+                    <Link
                         href="mailto:buenocambios@gmail.com"
                         className="bg-gray-700 hover:bg-gray-800 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-3 text-center text-base transition w-52 mx-auto"
                     >
@@ -57,5 +61,6 @@ export default function SupportPage() {
                 </div>
             </div>
         </main>
+        </ProtectedRoute>
     );
 }

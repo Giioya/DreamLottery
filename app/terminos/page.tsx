@@ -51,7 +51,7 @@ export default function TerminosYPrivacidadPage() {
             {messages[language].info86}
             </p>
             <a
-            href="https://sepolia.worldscan.io/address/0x7D771FC06a4F0f9d271E2Ff2D0eAC6e5F34bae9D"
+            href="https://github.com/DreamLottery/dreamLotteryContract"
             className="text-blue-700 underline"
             target="_blank"
             >

@@ -37,12 +37,12 @@ export default function SeguridadTransparenciaPage() {
                 <p className="text-gray-700 text-lg text-justify leading-relaxed">
                     {messages[language].info38}{" "}
                     <a
-                        href="https://sepolia.worldscan.io/address/0x7D771FC06a4F0f9d271E2Ff2D0eAC6e5F34bae9D"
+                        href="https://github.com/DreamLottery/dreamLotteryContract"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-700 underline"
                     >
-                        worldscan.io/contrato
+                        https://github.com/DreamLottery/dreamLotteryContract
                     </a>
                 </p>
 

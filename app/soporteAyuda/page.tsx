@@ -30,7 +30,7 @@ export default function SoportePage() {
                 </p>
 
                 <ul className="text-gray-700 text-lg text-left leading-relaxed list-disc list-inside">
-                    <li>📱 {messages[language].info52}</li>
+                    <li>📱 Discord </li>
                     <li>💬 {messages[language].info53}</li>
                     <li>📘 {messages[language].info54}</li>
                     <li>📧 {messages[language].info55}</li>

@@ -47,6 +47,11 @@ export default function ComoJugarPage() {
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td className="py-2 px-3">{messages[language].tableInfo3_1}</td>
+                                    <td className="py-2 px-3">0.25 WLD</td>
+                                    <td className="py-2 px-3">20 WLD</td>
+                                </tr>
+                                <tr>
                                     <td className="py-2 px-3">{messages[language].tableInfo4}</td>
                                     <td className="py-2 px-3">0.5 WLD</td>
                                     <td className="py-2 px-3">40 WLD</td>

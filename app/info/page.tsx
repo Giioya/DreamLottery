@@ -3,11 +3,13 @@
 import { LanguageContext } from "@/components/Idiomas/LanguajeProvider";
 import { messages } from "@/data/translations";
 import { useContext } from "react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function InfoPage() {
     const { language } = useContext(LanguageContext) as { language: keyof typeof messages };
 
     return (
+        <ProtectedRoute>
         <main
             className="min-h-screen bg-fixed bg-cover bg-center flex items-center justify-center"
             style={{
@@ -65,5 +67,6 @@ export default function InfoPage() {
                 </div>
             </div>
         </main>
+        </ProtectedRoute>
     );
 }

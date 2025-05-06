@@ -1,39 +1,51 @@
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
-import { MiniAppWalletAuthSuccessPayload, verifySiweMessage } from '@worldcoin/minikit-js';
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import {
+    MiniAppWalletAuthSuccessPayload,
+    verifySiweMessage,
+    } from "@worldcoin/minikit-js";
 
-interface IRequestPayload {
+    interface IRequestPayload {
     payload: MiniAppWalletAuthSuccessPayload;
     nonce: string;
     }
 
     export async function POST(req: NextRequest) {
-    try {
-        const { payload, nonce } = (await req.json()) as IRequestPayload;
+    const { payload, nonce } = (await req.json()) as IRequestPayload;
 
-        // Obtener cookies correctamente
-        const cookiesStore = await cookies(); // Si devuelve una promesa, la resolvemos
-        const storedNonce = cookiesStore.get?.('siwe')?.value; // Accedemos de forma segura
-
-        if (nonce !== storedNonce) {
+    if (nonce !== cookies().get("siwe")?.value) {
         return NextResponse.json({
-            status: 'error',
-            isValid: false,
-            message: 'Invalid nonce',
+        status: "error",
+        isValid: false,
+        message: "Invalid nonce",
         });
-        }
+    }
 
+    try {
         const validMessage = await verifySiweMessage(payload, nonce);
 
+        // Set auth cookies
+        cookies().set("wallet-auth", "authenticated", {
+        secure: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+        });
+
+        cookies().set("wallet-address", payload.address, {
+        secure: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+        });
+
         return NextResponse.json({
-        status: 'success',
+        status: "success",
         isValid: validMessage.isValid,
         });
     } catch (error: any) {
         return NextResponse.json({
-        status: 'error',
+        status: "error",
         isValid: false,
-        message: error.message || 'Error en la verificación',
+        message: error.message,
         });
     }
 }

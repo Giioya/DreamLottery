@@ -11,15 +11,15 @@ export default function Idiomas() {
     const [showMenu, setShowMenu] = useState(false);
 
     const languages: { code: keyof typeof messages; flag: string }[] = [
-        { code: "en",  flag: "🇺🇸" },
-        { code: "es",  flag: "🇪🇸" },
-        { code: "de",  flag: "🇩🇪" },
-        { code: "ja",  flag: "🇯🇵" },
-        { code: "ko",  flag: "🇰🇷" },
-        { code: "fr",  flag: "🇫🇷" },
-        { code: "pt",  flag: "🇵🇹" },
-        { code: "hi",  flag: "🇮🇳" },
-        { code: "zh",  flag: "🇨🇳" },
+        { code: "en",  flag: "🇺🇸 English" },
+        { code: "es",  flag: "🇪🇸 Español" },
+        { code: "de",  flag: "🇩🇪 Deutsch" },
+        { code: "ja",  flag: "🇯🇵 日本語" },
+        { code: "ko",  flag: "🇰🇷 한국어" },
+        { code: "fr",  flag: "🇫🇷 Français" },
+        { code: "pt",  flag: "🇵🇹 Português" },
+        { code: "hi",  flag: "🇮🇳 हिन्दी" },
+        { code: "zh",  flag: "🇨🇳 中文" },
     ];
 
     useEffect(() => {
@@ -41,34 +41,34 @@ export default function Idiomas() {
         <div className="fixed top-4 right-4 z-50">
             <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="px-4 py-2 text-white shadow-lg bg-white hover:bg-gray-500 flex items-center gap-2 rounded-2xl"
+                className="px-4 py-2 text-black shadow-lg bg-gray-200 hover:bg-gray-500 flex items-center gap-2 rounded-2xl"
             >
                 {/* 🌍 Bandera dinámica según idioma */}
                 <span className="text-lg">
                 {
-                language === "en" ? "🇺🇸"  : 
-                language === "es" ? "🇪🇸" : 
-                language === "de" ? "🇩🇪"  :  
-                language === "ja" ? "🇯🇵"  :  
-                language === "ko" ? "🇰🇷"   : 
-                language === "fr" ? "🇫🇷"  :  
-                language === "pt" ? "🇵🇹"  :
-                language === "hi" ? "🇮🇳"  :
-                language === "zh" ? "🇨🇳"  :
+                language === "en" ? "Language: 🇺🇸" : 
+                language === "es" ? "Idioma: 🇪🇸" : 
+                language === "de" ? "Sprache: 🇩🇪" : 
+                language === "ja" ? "言語: 🇯🇵" : 
+                language === "ko" ? "언어: 🇰🇷" : 
+                language === "fr" ? "Langue: 🇫🇷" : 
+                language === "pt" ? "Idioma: 🇵🇹" : 
+                language === "hi" ? "भाषा: 🇮🇳" : 
+                language === "zh" ? "语言: 🇨🇳" :
                 "🌍"}
                 </span>
                 
             </button>
 
             {showMenu && (
-                <div className="absolute right-0 bg-yellow-50 mt-2 w-15 border rounded-2xl shadow-lg z-50">
+                <div className="absolute right-0 bg-yellow-50 mt-2 w-15 border rounded-2xl shadow-lg z-50"> 
                     {languages.map(({ code, flag }) => (
                         <button
                             key={code}
                             onClick={() => changeLanguage(code)}
                             className="w-full text-left px-4 py-2 hover:bg-gray-200 flex items-center gap-2"
                         >
-                            <span className="text-lg">{flag}</span> 
+                            <span className="text-lg whitespace-nowrap">{flag}</span> 
                         </button>
                     ))}
                 </div>
