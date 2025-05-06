@@ -108,7 +108,7 @@ type Props = {
 
         if ('status' in finalPayload && finalPayload.status === 'error') {
             console.error("Error al enviar la transacción:", finalPayload)
-            setErrorMessage("Error al procesar la transacción")
+            setErrorMessage(messages[language].error)
             setIsError(true)
         } else if ('transaction_id' in finalPayload) {
             setTransactionId(finalPayload.transaction_id)
@@ -137,7 +137,6 @@ type Props = {
         </button>
 
         {isConfirming && <p>Confirmando transacción...</p>}
-        {isError && <p className="text-red-500">❌ Hubo un error en la transacción</p>}
         </div>
     )
 }
